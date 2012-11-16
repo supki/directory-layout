@@ -1,11 +1,11 @@
-name: file-layout
-version: 0.1.0.0
-synopsis: DSL for file layouts in a file system.
-license: MIT
-license-file: LICENSE
-author: Matvey Aksenov
-maintainer: matvey.aksenov@gmail.com
-build-type: Simple
+name:          file-layout
+version:       0.1.0.0
+synopsis:      DSL for file layouts in a file system.
+license:       MIT
+license-file:  LICENSE
+author:        Matvey Aksenov
+maintainer:    matvey.aksenov@gmail.com
+build-type:    Simple
 cabal-version: >= 1.8
 
 library
@@ -18,3 +18,11 @@ library
                  filepath,
                  transformers,
                  text
+
+test-suite check-check
+  type: exitcode-stdio-1.0
+  build-depends: base >= 3 && < 5,
+                 HUnit,
+                 process,
+                 file-layout
+  main-is: tests/check/Main.hs

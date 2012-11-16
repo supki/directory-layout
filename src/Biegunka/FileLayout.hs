@@ -1,7 +1,7 @@
 module Biegunka.FileLayout
   ( file, fileText, dir
-  , check
+  , FLCheckFailure(..), check
   ) where
 
 import Biegunka.FileLayout.Internal (file, fileText, dir)
-import Biegunka.FileLayout.Check (check)
+import Biegunka.FileLayout.Check (FLCheckFailure(..), check)
