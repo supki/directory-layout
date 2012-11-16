@@ -17,7 +17,7 @@ import qualified Data.Text.IO as T
 import           System.FilePath ((</>), makeRelative)
 import           System.Directory
 
-import Biegunka.FileLayout (FL(..))
+import Biegunka.FileLayout.Internal (FL(..))
 
 
 check ∷ FilePath → FL a → IO [FLCheckFailure]
