@@ -1,14 +1,42 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UnicodeSyntax #-}
+-- | Check if current file layout agrees with script
+--
+-- For example, suppose there is a tree:
+--
+-- @
+-- % tree
+-- .
+-- ├── baz
+-- │   └── twey
+-- └── foo
+--     ├── bar
+--     │   ├── quuz
+--     │   └── tatata
+--     └── quux
+-- @
+--
+-- then you can write:
+--
+-- @
+-- script = do
+--   directory \"baz\" $
+--     file_ \"twey\"
+--   directory \"foo\" $ do
+--     directory \"bar\" $ do
+--       file_ \"quuz\"
+--       file_ \"tatata\"
+--     file_ \"quux\"
+-- @
+--
+-- and running @check script \".\"@ should result in @[]@
 module Biegunka.FileLayout.Check
   ( FLCheckFailure(..), check
   ) where
 
-import Control.Exception (SomeException, handle)
+import Control.Arrow (second)
 import Control.Monad (unless, when)
 
-import           Control.Monad.Trans.Reader (ReaderT, runReaderT, ask)
+import           Control.Monad.Trans.Reader (ReaderT, runReaderT, ask, local)
 import           Control.Monad.Trans.Writer (WriterT, execWriterT, tell)
 import           Control.Monad.IO.Class (liftIO)
 import           Control.Monad.Trans.Class (lift)
@@ -20,8 +48,11 @@ import           System.Directory
 import Biegunka.FileLayout.Internal (FL(..))
 
 
-check ∷ FilePath → FL a → IO [FLCheckFailure]
-check fp z = do
+-- | Check file layout corresponds to written script
+check ∷ FL a                -- ^ Layout script
+      → FilePath            -- ^ Root directory
+      → IO [FLCheckFailure] -- ^ List of failures
+check z fp = do
   d ← getCurrentDirectory
   fp' ← canonicalizePath fp
   setCurrentDirectory fp'
@@ -36,11 +67,12 @@ check fp z = do
   f (D p x y) = dirExists p >>= \t → when t (changeDir p (f x)) >> f y
 
 
+-- | Data type representing various failures
+-- that may occur while checking file layout
 data FLCheckFailure =
     FileDoesNotExist FilePath
   | FileWrongContents FilePath Text
   | DirectoryDoesNotExist FilePath
-  | ChangeDirectoryFailed FilePath FilePath
     deriving (Show, Read, Eq, Ord)
 
 
@@ -51,50 +83,40 @@ runCheckT ∷ (FilePath, FilePath) → CheckT a → IO [FLCheckFailure]
 runCheckT e = execWriterT . flip runReaderT e
 
 
+-- | File existence check
+-- emits 'FileDoesNotExist' on failure
 fileExists ∷ FilePath → CheckT Bool
 fileExists p = do
   (r, d) ← ask
-  z ← io $ doesFileExist p
+  z ← io $ doesFileExist (d </> p)
   unless z $
     tell' [FileDoesNotExist (makeRelative r d </> p)]
   return z
 
 
+-- | Directory existence check
+-- emits 'DirectoryDoesNotExist' on failure
 dirExists ∷ FilePath → CheckT Bool
 dirExists p = do
   (r, d) ← ask
-  z ← io $ doesDirectoryExist p
+  z ← io $ doesDirectoryExist (d </> p)
   unless z $
     tell' [DirectoryDoesNotExist (makeRelative r d </> p)]
   return z
 
 
+-- | File contents check
+-- emits 'FileDoesNotExist' on failure
 fileContains ∷ FilePath → Text → CheckT ()
 fileContains p c = do
   (r, d) ← ask
-  y ← io $ T.readFile p
-  unless (y == c) $
-    tell' [FileWrongContents (makeRelative r d </> p) y]
+  z ← io $ T.readFile (d </> p)
+  unless (z == c) $
+    tell' [FileWrongContents (makeRelative r d </> p) z]
 
 
 changeDir ∷ FilePath → CheckT () → CheckT ()
-changeDir fp x = do
-  (r, d) ← ask
-  tell' `whenJust` (maybeHandle (setCurrentDirectory d) . runCheckT (r, d </> fp) $ cd fp >> x >> cd d)
- where
-  cd = io . setCurrentDirectory
-
-
-whenJust ∷ Monad m ⇒ (a → m b) → m (Maybe a) → m ()
-whenJust f x = do
-  p ← x
-  case p of
-    Just y → f y >> return ()
-    Nothing → return ()
-
-
-maybeHandle ∷ IO a → IO b → CheckT (Maybe b)
-maybeHandle m = io . handle (\(_ ∷ SomeException) → m >> return Nothing) . fmap Just
+changeDir fp = local (second (</> fp))
 
 
 io ∷ IO a → CheckT a

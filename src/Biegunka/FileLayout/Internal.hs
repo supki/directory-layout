@@ -1,13 +1,13 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE UnicodeSyntax #-}
 module Biegunka.FileLayout.Internal
   ( FL(..)
-  , file, fileText, dir
+  , file, file_, directory, directory_
   ) where
 
-import           Data.Text (Text)
+import Data.Text (Text)
 
 
+-- | Abstract data type representing directory tree
 data FL f
   = E f
   | F FilePath (Maybe Text) (FL f)
@@ -28,13 +28,21 @@ instance Monad FL where
   D fp x y >>= f = D fp x (y >>= f)
 
 
-file ∷ FilePath → FL ()
-file x = F x Nothing (return ())
+-- | Declare file with specified contents
+file ∷ FilePath → Text → FL ()
+file x c = F x (Just c) (return ())
 
 
-fileText ∷ FilePath → Text → FL ()
-fileText x c = F x (Just c) (return ())
+-- | Declare empty file
+file_ ∷ FilePath → FL ()
+file_ x = F x Nothing (return ())
 
 
-dir ∷ FilePath → FL () → FL ()
-dir x d = D x d (return ())
+-- | Declare directory with specified listing
+directory ∷ FilePath → FL () → FL ()
+directory x d = D x d (return ())
+
+
+-- | Declare empty directory
+directory_ ∷ FilePath → FL ()
+directory_ x = D x (return ()) (return ())

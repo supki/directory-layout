@@ -22,19 +22,19 @@ main = do
 testTrivia1 ∷ Test
 testTrivia1 = TestCase $ do
   install
-  check "file-layout-test" script >>= assertEqual "correct" []
+  check' >>= assertEqual "correct" []
 
   install
   rawSystem "rm" ["-rf", "file-layout-test/x"]
-  check "file-layout-test" script >>= assertEqual "deleted x" [DirectoryDoesNotExist "./x"]
+  check' >>= assertEqual "deleted x" [DirectoryDoesNotExist "./x"]
 
   install
   rawSystem "rm" ["-rf", "file-layout-test/x/y"]
-  check "file-layout-test" script >>= assertEqual "deleted y" [DirectoryDoesNotExist "x/y"]
+  check' >>= assertEqual "deleted y" [DirectoryDoesNotExist "x/y"]
 
   install
   rawSystem "rm" ["-rf", "file-layout-test/x/z"]
-  check "file-layout-test" script >>= assertEqual "deleted z" [FileDoesNotExist "x/z"]
+  check' >>= assertEqual "deleted z" [FileDoesNotExist "x/z"]
 
   rawSystem "rm" ["-rf", "file-layout-test"]
   return ()
@@ -45,31 +45,33 @@ testTrivia1 = TestCase $ do
     rawSystem "touch" ["file-layout-test/x/z"]
 
   script =
-    dir "x" $ do
-      dir "y" $ return ()
-      file "z"
+    directory "x" $ do
+      directory_ "y"
+      file_ "z"
+
+  check' = check script "file-layout-test"
 
 
 testTrivia2 ∷ Test
 testTrivia2 = TestCase $ do
   install
-  check "file-layout-test" script >>= assertEqual "correct" []
+  check' >>= assertEqual "correct" []
 
   install
   rawSystem "rm" ["-rf", "file-layout-test/x/y"]
-  check "file-layout-test" script >>= assertEqual "deleted y" [DirectoryDoesNotExist "x/y"]
+  check' >>= assertEqual "deleted y" [DirectoryDoesNotExist "x/y"]
 
   install
   rawSystem "rm" ["-rf", "file-layout-test/z"]
-  check "file-layout-test" script >>= assertEqual "deleted z" [DirectoryDoesNotExist "./z"]
+  check' >>= assertEqual "deleted z" [DirectoryDoesNotExist "./z"]
 
   install
   rawSystem "rm" ["-rf", "file-layout-test/x/y/s"]
-  check "file-layout-test" script >>= assertEqual "deleted s" [FileDoesNotExist "x/y/s"]
+  check' >>= assertEqual "deleted s" [FileDoesNotExist "x/y/s"]
 
   install
   writeFile "file-layout-test/z/w" "foo"
-  check "file-layout-test" script >>= assertEqual "changed z/w" [FileWrongContents "z/w" "foo"]
+  check' >>= assertEqual "changed z/w" [FileWrongContents "z/w" "foo"]
 
   rawSystem "rm" ["-rf", "file-layout-test"]
   return ()
@@ -84,9 +86,11 @@ testTrivia2 = TestCase $ do
     writeFile "file-layout-test/z/w" "text"
 
   script = do
-    dir "x" $
-      dir "y" $ do
-        file "s"
-        file "v"
-    dir "z" $
-      fileText "w" "text"
+    directory "x" $
+      directory "y" $ do
+        file_ "s"
+        file_ "v"
+    directory "z" $
+      file "w" "text"
+
+  check' = check script "file-layout-test"
