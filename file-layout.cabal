@@ -28,6 +28,6 @@ test-suite check
                  HUnit,
                  process,
                  file-layout
-  main-is: tests/check/Main.hs
+  main-is: tests/Main.hs
   ghc-options: -Wall
                -fno-warn-unused-do-bind
