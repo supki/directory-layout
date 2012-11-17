@@ -19,19 +19,15 @@ library
                  filepath,
                  transformers,
                  text
+  ghc-options: -Wall
+               -fno-warn-unused-do-bind
 
-test-suite check-check
+test-suite check
   type: exitcode-stdio-1.0
   build-depends: base >= 3 && < 5,
                  HUnit,
                  process,
                  file-layout
   main-is: tests/check/Main.hs
-
-test-suite run-check
-  type: exitcode-stdio-1.0
-  build-depends: base >= 3 && < 5,
-                 HUnit,
-                 process,
-                 file-layout
-  main-is: tests/run/Main.hs
+  ghc-options: -Wall
+               -fno-warn-unused-do-bind
