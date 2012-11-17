@@ -11,6 +11,7 @@ cabal-version: >= 1.8
 library
   exposed-modules: Biegunka.FileLayout
                    Biegunka.FileLayout.Check
+                   Biegunka.FileLayout.Run
   other-modules: Biegunka.FileLayout.Internal
   hs-source-dirs: src
   build-depends: base >= 3 && < 5,
@@ -26,3 +27,11 @@ test-suite check-check
                  process,
                  file-layout
   main-is: tests/check/Main.hs
+
+test-suite run-check
+  type: exitcode-stdio-1.0
+  build-depends: base >= 3 && < 5,
+                 HUnit,
+                 process,
+                 file-layout
+  main-is: tests/run/Main.hs

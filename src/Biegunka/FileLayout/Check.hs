@@ -48,7 +48,7 @@ import           System.Directory
 import Biegunka.FileLayout.Internal (FL(..))
 
 
--- | Check file layout corresponds to written script
+-- | Check file layout corresponds to script
 check ∷ FL a                -- ^ Layout script
       → FilePath            -- ^ Root directory
       → IO [FLCheckFailure] -- ^ List of failures
