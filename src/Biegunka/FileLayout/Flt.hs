@@ -40,12 +40,17 @@ p_directory ∷ Stream t Identity Char ⇒ Int → Parsec t u (FL ())
 p_directory n = do
   name ← p_directory_name
   indent ← length <$> lookAhead (many (char ' '))
-  if (indent > n)
-    then do
-      inner ← sequence_ <$> many1 (try (string (replicate indent ' ') *> p_any indent) <|> fail "m")
-      return (D name inner (return ()))
-    else
-      return (D name (return ()) (return ()))
+  (\inner → D name inner (E ())) <$>
+    if (indent > n)
+      then sequence_ <$>
+        generous_some (string (replicate indent ' ') *> p_any indent)
+      else return $ E ()
+
+
+generous_some ∷ Parsec t u a → Parsec t u [a]
+generous_some p = (:) <$> p <*> f
+ where
+  f = try ((:) <$> p <*> f) <|> return []
 
 
 {-
@@ -62,7 +67,7 @@ p_file = do
 p_empty_file ∷ Stream t Identity Char ⇒ Parsec t u (FL ())
 p_empty_file = do
   name ← p_file_name
-  return (F name Nothing (return ()))
+  return (F name Nothing (E ()))
 
 
 {-
@@ -71,8 +76,8 @@ p_text = many1 anyChar
 
 
 p_directory_name ∷ Stream t Identity Char ⇒ Parsec t u String
-p_directory_name = many1 (noneOf "/\n") <* char '/' <* char '\n'
+p_directory_name = some (noneOf "/\n") <* char '/' <* char '\n'
 
 
 p_file_name ∷ Stream t Identity Char ⇒ Parsec t u String
-p_file_name = intercalate "." <$> ((many1 (noneOf "/.\n") `sepBy` char '.') <* char '\n')
+p_file_name = intercalate "." <$> ((some (noneOf "/.\n") `sepBy` char '.') <* char '\n')
