@@ -2,6 +2,7 @@
 {-# LANGUAGE UnicodeSyntax #-}
 module Main where
 
+import Data.String (IsString)
 import System.Exit (exitSuccess, exitFailure)
 
 import Biegunka.FileLayout
@@ -20,6 +21,7 @@ main = do
     [ TestLabel "trivia1" testTrivia1
     , TestLabel "trivia2" testTrivia2
     , TestLabel "dual1" testDual1
+    , TestLabel "parsing1" testParsing1
     ]
 
 
@@ -127,3 +129,61 @@ testDual1 = TestCase $ do
   test' s = run' s >> check' s
   run' s = run s "file-layout-test"
   check' s = check s "file-layout-test" >>= assertEqual "dual" []
+
+
+testParsing1 ∷ Test
+testParsing1 = TestCase $ do
+  assertEqual "test0" (return flt0) (flt test0)
+  assertEqual "test0'" (return flt0) (flt' test0)
+  assertEqual "test1" (return flt1) (flt test1)
+  assertEqual "test1'" (return flt1) (flt' test1)
+  assertEqual "test2" (return flt2) (flt test2)
+  assertEqual "test2'" (return flt2) (flt' test2)
+  assertEqual "test3" (return flt3) (flt test3)
+  assertEqual "test3'" (return flt3) (flt' test3)
+  assertEqual "test4" (return flt4) (flt test4)
+  assertEqual "test4'" (return flt4) (flt' test4)
+  assertEqual "test5" (return flt5) (flt test5)
+  assertEqual "test5'" (return flt5) (flt' test5)
+  assertEqual "test6" (return flt6) (flt test6)
+  assertEqual "test6'" (return flt6) (flt' test6)
+  assertEqual "test7" (return flt7) (flt test7)
+  assertEqual "test7'" (return flt7) (flt' test7)
+  assertEqual "test8" (return flt8) (flt test8)
+  assertEqual "test8'" (return flt8) (flt' test8)
+  assertEqual "test9" (return flt9) (flt test9)
+  assertEqual "test9'" (return flt9) (flt' test9)
+  assertEqual "test10" (return flt10) (flt test10)
+  assertEqual "test10'" (return flt10) (flt' test10)
+ where
+  test0, test1, test2, test3, test4, test5, test6, test7, test8, test9, test10 ∷ IsString s ⇒ s
+  flt0  = return ()
+  test0 = ""
+  flt1  = file_ "file"
+  test1 = "file\n"
+  flt2  = directory_ "dir"
+  test2 = "dir/\n"
+  flt3  = directory "dir" (file_ "file")
+  test3 = "dir/\n file\n"
+  flt4  = directory_ "dir" >> file_ "file"
+  test4 = "dir/\nfile\n"
+  flt5  = file_ "file" >> directory_ "dir"
+  test5 = "file\ndir/\n"
+  flt6  = directory "dir" (directory "dir" (file_ "file"))
+  test6 = "dir/\n dir/\n  file\n"
+  flt7  = directory "dir" (directory "dir" (file_ "file") >> file_ "file")
+  test7 = "dir/\n dir/\n  file\n file\n"
+  flt8  = directory "dir" (directory "dir" (file_ "file")) >> file_ "file"
+  test8 = "dir/\n dir/\n  file\nfile\n"
+  flt9  = directory "dir" (directory "dir" (directory_ "dir")) >> file_ "file"
+  test9 = "dir/\n dir/\n  dir/\nfile\n"
+  flt10 = do
+    file_ "file"
+    directory "dir" $
+      directory "dir" $
+        file_ "file"
+    directory_ "dir"
+    directory "dir" $
+      file_ "file"
+    file_ "file"
+  test10 = "file\ndir/\n dir/\n  file\ndir/\ndir/\n file\nfile\n"

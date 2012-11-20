@@ -12,7 +12,7 @@ data FL f
   = E f
   | F FilePath (Maybe Text) (FL f)
   | D FilePath (FL ()) (FL f)
-    deriving (Show)
+    deriving (Show, Read, Eq)
 
 
 instance Functor FL where

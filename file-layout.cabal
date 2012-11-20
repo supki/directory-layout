@@ -12,12 +12,14 @@ library
   exposed-modules: Biegunka.FileLayout
                    Biegunka.FileLayout.Check
                    Biegunka.FileLayout.Run
+                   Biegunka.FileLayout.Flt
   other-modules: Biegunka.FileLayout.Internal
   hs-source-dirs: src
   build-depends: base >= 3 && < 5,
                  directory,
                  filepath,
                  transformers,
+                 parsec,
                  text
   ghc-options: -Wall
                -fno-warn-unused-do-bind
