@@ -1,5 +1,5 @@
 {-# LANGUAGE UnicodeSyntax #-}
--- | Check if current file layout agrees with script
+-- | Check if current directory layout agrees with specified one
 --
 -- For example, suppose there is a tree:
 --
@@ -18,7 +18,7 @@
 -- then you can write:
 --
 -- @
--- script = do
+-- layout = do
 --   directory \"baz\" $
 --     file_ \"twey\"
 --   directory \"foo\" $ do
@@ -28,9 +28,9 @@
 --     file_ \"quux\"
 -- @
 --
--- and running @check script \".\"@ should result in @[]@
-module Biegunka.FileLayout.Check
-  ( FLCheckFailure(..), check
+-- and running @check layout \".\"@ should result in @[]@
+module System.Directory.Layout.Check
+  ( DLCheckFailure(..), check
   ) where
 
 import Control.Arrow (second)
@@ -45,13 +45,13 @@ import qualified Data.Text.IO as T
 import           System.FilePath ((</>), makeRelative)
 import           System.Directory
 
-import Biegunka.FileLayout.Internal (FL(..))
+import System.Directory.Layout.Internal (DL(..))
 
 
--- | Check file layout corresponds to script
-check ∷ FL a                -- ^ Layout script
+-- | Check directory layout corresponds to specified one
+check ∷ DL a                -- ^ Layout
       → FilePath            -- ^ Root directory
-      → IO [FLCheckFailure] -- ^ List of failures
+      → IO [DLCheckFailure] -- ^ List of failures
 check z fp = do
   d ← getCurrentDirectory
   fp' ← canonicalizePath fp
@@ -60,7 +60,7 @@ check z fp = do
   setCurrentDirectory d
   return xs
  where
-  f ∷ FL a → CheckT ()
+  f ∷ DL a → CheckT ()
   f (E _) = return ()
   f (F p Nothing x) = fileExists p >> f x
   f (F p (Just c) x) = fileExists p >>= \t → when t (fileContains p c) >> f x
@@ -68,18 +68,18 @@ check z fp = do
 
 
 -- | Data type representing various failures
--- that may occur while checking file layout
-data FLCheckFailure =
+-- that may occur while checking directory layout
+data DLCheckFailure =
     FileDoesNotExist FilePath
   | FileWrongContents FilePath Text
   | DirectoryDoesNotExist FilePath
     deriving (Show, Read, Eq, Ord)
 
 
-type CheckT = ReaderT (FilePath, FilePath) (WriterT [FLCheckFailure] IO)
+type CheckT = ReaderT (FilePath, FilePath) (WriterT [DLCheckFailure] IO)
 
 
-runCheckT ∷ (FilePath, FilePath) → CheckT a → IO [FLCheckFailure]
+runCheckT ∷ (FilePath, FilePath) → CheckT a → IO [DLCheckFailure]
 runCheckT e = execWriterT . flip runReaderT e
 
 
@@ -123,5 +123,5 @@ io ∷ IO a → CheckT a
 io = liftIO
 
 
-tell' ∷ [FLCheckFailure] → CheckT ()
+tell' ∷ [DLCheckFailure] → CheckT ()
 tell' = lift . tell

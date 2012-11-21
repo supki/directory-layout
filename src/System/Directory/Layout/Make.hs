@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE UnicodeSyntax #-}
--- | Run script infecting directory with stuff.
+-- | Make layout as specified
 --
 -- For example, suppose you are in an empty directory
 --
@@ -9,10 +9,10 @@
 -- .
 -- @
 --
--- and you've written simple script:
+-- and you've written simple layout:
 --
 -- @
--- script = do
+-- layout = do
 --   directory \"baz\" $
 --     file_ \"twey\"
 --   directory \"foo\" $ do
@@ -36,8 +36,8 @@
 --     └── quux
 -- @
 --
-module Biegunka.FileLayout.Run
-  ( FLRunWarning(..), run
+module System.Directory.Layout.Make
+  ( DLMakeWarning(..), make
   ) where
 
 import Control.Arrow (second)
@@ -51,14 +51,14 @@ import qualified Data.Text.IO as T
 import           System.FilePath ((</>), makeRelative)
 import           System.Directory
 
-import Biegunka.FileLayout.Internal (FL(..))
+import System.Directory.Layout.Internal (DL(..))
 
 
 -- | Infect file layout with stuff from script
-run ∷ FL a              -- ^ Layout script
-    → FilePath          -- ^ Root directory
-    → IO [FLRunWarning] -- ^ List of warnings
-run z fp = do
+make ∷ DL a              -- ^ Layout
+     → FilePath          -- ^ Root directory
+     → IO [DLMakeWarning] -- ^ List of warnings
+make z fp = do
   d ← getCurrentDirectory
   fp' ← canonicalizePath fp
   setCurrentDirectory fp'
@@ -66,7 +66,7 @@ run z fp = do
   setCurrentDirectory d
   return xs
  where
-  f ∷ FL a → RunT ()
+  f ∷ DL a → RunT ()
   f (E _) = return ()
   f (F p Nothing x) = touchFile p >> f x
   f (F p (Just c) x) = touchFile p >> infectFile p c >> f x
@@ -75,16 +75,16 @@ run z fp = do
 
 -- | Data type representing various warnings
 -- that may occur while infecting directory layout
-data FLRunWarning =
+data DLMakeWarning =
     FileDoesExist FilePath
   | DirectoryDoesExist FilePath
     deriving (Show, Read, Eq, Ord)
 
 
-type RunT = ReaderT (FilePath, FilePath) (WriterT [FLRunWarning] IO)
+type RunT = ReaderT (FilePath, FilePath) (WriterT [DLMakeWarning] IO)
 
 
-runRunT ∷ (FilePath, FilePath) → RunT a → IO [FLRunWarning]
+runRunT ∷ (FilePath, FilePath) → RunT a → IO [DLMakeWarning]
 runRunT e = execWriterT . flip runReaderT e
 
 
@@ -124,5 +124,5 @@ io ∷ IO a → RunT a
 io = liftIO
 
 
-tell' ∷ [FLRunWarning] → RunT ()
+tell' ∷ [DLMakeWarning] → RunT ()
 tell' = lift . tell

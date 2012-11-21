@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE UnicodeSyntax #-}
--- | Flt is text format for FileLayout data structure, for example
+-- | Parser for text format for DL data structure, for example
 --
 -- @
 -- c/
@@ -27,8 +27,8 @@
 --    directory_ \"d\"
 -- @
 --
-module Biegunka.FileLayout.Flt
-  ( flt, flt'
+module System.Directory.Layout.Parser
+  ( layout, layout'
   ) where
 
 import Control.Applicative
@@ -43,35 +43,35 @@ import           Text.Parsec hiding ((<|>), many)
 import           Text.Parsec.Text ()
 import           Text.Parsec.Text.Lazy ()
 
-import Biegunka.FileLayout.Internal
+import System.Directory.Layout.Internal
 
 
--- | Flt data as lazy 'Text' parser
-flt ∷ LT.Text → Either String (FL ())
-flt = gflt
+-- | lazy 'Text' parser
+layout ∷ LT.Text → Either String (DL ())
+layout = glayout
 
 
--- | Flt data as strict 'Text' parser
-flt' ∷ T.Text → Either String (FL ())
-flt' = gflt
+-- | strict 'Text' parser
+layout' ∷ T.Text → Either String (DL ())
+layout' = glayout
 
 
-gflt ∷ Stream s Identity Char ⇒ s → Either String (FL ())
-gflt = left show . parse (sequence_ <$> many (p_any 0)) "(flt parser)"
+glayout ∷ Stream s Identity Char ⇒ s → Either String (DL ())
+glayout = left show . parse (sequence_ <$> many (p_any 0)) "(layout parser)"
 
 
-p_any ∷ Stream s Identity Char ⇒ Int → Parsec s u (FL ())
+p_any ∷ Stream s Identity Char ⇒ Int → Parsec s u (DL ())
 p_any n = try (p_directory n) <|> p_file n
 
 
-p_directory ∷ Stream s Identity Char ⇒ Int → Parsec s u (FL ())
+p_directory ∷ Stream s Identity Char ⇒ Int → Parsec s u (DL ())
 p_directory n = do
   name ← p_directory_name
   inner ← sequence_ <$> try (inners p_any n) <|> return (E ())
   return $ D name inner (E ())
 
 
-p_file ∷ Stream s Identity Char ⇒ Int → Parsec s u (FL ())
+p_file ∷ Stream s Identity Char ⇒ Int → Parsec s u (DL ())
 p_file n = do
   name ← p_file_name
   inner ← Just . T.intercalate "\n" <$> try (inners (const p_text) n) <|> return Nothing
