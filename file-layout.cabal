@@ -1,6 +1,6 @@
 name:          file-layout
 version:       0.1.0.0
-synopsis:      DSL for file layouts in a file system.
+synopsis:      Declare, construct and check file layout
 license:       MIT
 license-file:  LICENSE
 author:        Matvey Aksenov
@@ -13,7 +13,7 @@ library
                    Biegunka.FileLayout.Check
                    Biegunka.FileLayout.Run
                    Biegunka.FileLayout.Flt
-  other-modules: Biegunka.FileLayout.Internal
+                   Biegunka.FileLayout.Internal
   hs-source-dirs: src
   build-depends: base >= 3 && < 5,
                  directory,

@@ -1,13 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE UnicodeSyntax #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 module Main where
 
 import Data.String (IsString)
 import System.Exit (exitSuccess, exitFailure)
 
 import Biegunka.FileLayout
+import Biegunka.FileLayout.Internal
 import Test.HUnit
 import System.Process (rawSystem)
+
+
+deriving instance Eq a ⇒ Eq (FL a)
 
 
 main ∷ IO ()
@@ -22,6 +28,7 @@ main = do
     , TestLabel "trivia2" testTrivia2
     , TestLabel "dual1" testDual1
     , TestLabel "parsing1" testParsing1
+    , TestLabel "parsing2" testParsing2
     ]
 
 
@@ -187,3 +194,38 @@ testParsing1 = TestCase $ do
       file_ "file"
     file_ "file"
   test10 = "file\ndir/\n dir/\n  file\ndir/\ndir/\n file\nfile\n"
+
+
+testParsing2 ∷ Test
+testParsing2 = TestCase $ do
+  assertEqual "test0" (return flt0) (flt test0)
+  assertEqual "test0'" (return flt0) (flt' test0)
+  assertEqual "test1" (return flt1) (flt test1)
+  assertEqual "test1'" (return flt1) (flt' test1)
+  assertEqual "test2" (return flt2) (flt test2)
+  assertEqual "test2'" (return flt2) (flt' test2)
+  assertEqual "test3" (return flt3) (flt test3)
+  assertEqual "test3'" (return flt3) (flt' test3)
+  assertEqual "test4" (return flt4) (flt test4)
+  assertEqual "test4'" (return flt4) (flt' test4)
+  assertEqual "test5" (return flt5) (flt test5)
+  assertEqual "test5'" (return flt5) (flt' test5)
+ where
+  test0, test1, test2, test3, test4, test5 ∷ IsString s ⇒ s
+  flt0  = file "file" "n\nn\n"
+  test0 = "file\n n\n n\n \n"
+  flt1  = file "file" "n\nn\n" >> file "file" "t\nt\n"
+  test1 = "file\n n\n n\n \nfile\n t\n t\n \n"
+  flt2  = file "file" "n\nn\n" >> file_ "file"
+  test2 = "file\n n\n n\n \nfile\n"
+  flt3  = file_ "file" >> file "file" "n\nn\n"
+  test3 = "file\nfile\n n\n n\n \n"
+  flt4  = file_ "file" >> file "file" "n\nn\n" >> file_ "file"
+  test4 = "file\nfile\n n\n n\n \nfile\n"
+  flt5  = do
+    directory "dir" $ do
+      file_ "file"
+      file "file" "n\nn\n"
+      file "file" "t\nt\n"
+    directory_ "dir"
+  test5 = "dir/\n file\n file\n  n\n  n\n  \n file\n  t\n  t\n  \ndir/\n"
