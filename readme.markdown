@@ -22,6 +22,9 @@ test-dir/
 It could be parsed by `layout` method to `DL()` object:
 
 ```haskell
+import System.Directory.Layout
+import qualified Data.Text.Lazy as T
+
 ltext :: Either String (DL ())
 ltext = layout $ T.unlines
   [ "test-dir/"
@@ -46,7 +49,6 @@ Now it could be called to apply this directory layout using home directory as a 
 
 ```haskell
 import System.Directory (getHomeDirectory)
-import System.Directory.Layout
 
 main :: IO ()
 main = do
