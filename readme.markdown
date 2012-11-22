@@ -1,9 +1,7 @@
-# Directory layout
+# Directory layout [![Build Status](https://secure.travis-ci.org/supki/directory-layout.png?branch=master)](http://travis-ci.org/supki/directory-layout)
 
-[![Build Status](https://secure.travis-ci.org/supki/directory-layout.png?branch=master)](http://travis-ci.org/supki/directory-layout)
-
-Directory layout is a specific format of defining directories and files locations.
-
+## About 
+Directory layout is a specific format of defining directories and files locations.  
 This library provides functions for declaring, constructing and verifying directory layouts.
 
 ## Usage
