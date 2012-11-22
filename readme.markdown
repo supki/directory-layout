@@ -6,7 +6,7 @@ Directory layout is a specific format of defining directories and files location
 
 This library provides functions for declaring, constructing and verifying directory layouts.
 
-# Usage
+## Usage
 
 Suppose we have a simple directory layout:
 
