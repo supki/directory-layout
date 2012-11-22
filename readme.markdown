@@ -2,13 +2,13 @@
 
 [![Build Status](https://secure.travis-ci.org/supki/directory-layout.png?branch=master)](http://travis-ci.org/supki/directory-layout)
 
-Directory layout is a specific format for defining directory and files locations.
+Directory layout is a specific format of defining directories and files locations.
 
-This library provides some methods for declaring, constructing and verifying directory layouts.
+This library provides functions for declaring, constructing and verifying directory layouts.
 
 # Usage
 
-Suppose we have simple directory layout:
+Suppose we have a simple directory layout:
 
 ```
 test-dir/
@@ -19,7 +19,7 @@ test-dir/
   empty-dir/
 ```
 
-It could be parsed by `layout` method to `DL()` object:
+`layout` function converts text representation into `DL ()` value:
 
 ```haskell
 import System.Directory.Layout
@@ -36,7 +36,7 @@ ltext = layout $ T.unlines
   ]
 ```
 
-It could be rewritten directly with `file` and `directory` methods:
+Or this `DL ()` value might be written directly:
 
 ```haskell
 l :: DL ()
@@ -45,20 +45,18 @@ l = directory "test-dir" $ do
   directory_ "empty-dir"
 ```
 
-Now it could be called to apply this directory layout using home directory as a root directory:
+Then we could make layout specified by `l` with home directory as root and print warnings (if any):
 
 ```haskell
 import System.Directory (getHomeDirectory)
 
 main :: IO ()
-main = do
-  mapM_ print =<< make l =<< getHomeDirectory
+main = mapM_ print =<< make l =<< getHomeDirectory
 ```
 
-Existing directory layout could be also verified with `check` method:
+Also we could verify that `l` corresponds to existing directory layout with `check` function and print failures (if any):
 
 ```haskell
 main :: IO ()
-main = do
-  mapM_ print =<< check l =<< getHomeDirectory
+main = mapM_ print =<< check l =<< getHomeDirectory
 ```
