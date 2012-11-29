@@ -51,11 +51,11 @@ import qualified Data.Text.IO as T
 import           System.FilePath ((</>), makeRelative)
 import           System.Directory
 
-import System.Directory.Layout.Internal (DL(..))
+import System.Directory.Layout.Internal
 
 
 -- | Infect file layout with stuff from script
-make ∷ DL a              -- ^ Layout
+make ∷ Layout
      → FilePath          -- ^ Root directory
      → IO [DLMakeWarning] -- ^ List of warnings
 make z fp = do
@@ -66,7 +66,6 @@ make z fp = do
   setCurrentDirectory d
   return xs
  where
-  f ∷ DL a → RunT ()
   f (E _) = return ()
   f (F p Nothing x) = touchFile p >> f x
   f (F p (Just c) x) = touchFile p >> infectFile p c >> f x

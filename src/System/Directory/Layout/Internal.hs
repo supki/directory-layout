@@ -1,18 +1,22 @@
 {-# LANGUAGE UnicodeSyntax #-}
 {-# OPTIONS_HADDOCK hide #-}
 module System.Directory.Layout.Internal
-  ( DL(..)
+  ( DL(..), Layout
   ) where
 
 import Data.Text (Text)
 
 
--- | Abstract data type representing directory tree
+-- | Abstract data type representing directory tree is nice
 data DL f
   = E f
   | F FilePath (Maybe Text) (DL f)
   | D FilePath (DL ()) (DL f)
     deriving (Show, Read)
+
+
+-- | But type synonym is nicer
+type Layout = DL ()
 
 
 instance Functor DL where

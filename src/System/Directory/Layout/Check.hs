@@ -45,11 +45,11 @@ import qualified Data.Text.IO as T
 import           System.FilePath ((</>), makeRelative)
 import           System.Directory
 
-import System.Directory.Layout.Internal (DL(..))
+import System.Directory.Layout.Internal
 
 
 -- | Check directory layout corresponds to specified one
-check ∷ DL a                -- ^ Layout
+check ∷ Layout
       → FilePath            -- ^ Root directory
       → IO [DLCheckFailure] -- ^ List of failures
 check z fp = do
@@ -60,7 +60,6 @@ check z fp = do
   setCurrentDirectory d
   return xs
  where
-  f ∷ DL a → CheckT ()
   f (E _) = return ()
   f (F p Nothing x) = fileExists p >> f x
   f (F p (Just c) x) = fileExists p >>= \t → when t (fileContains p c) >> f x

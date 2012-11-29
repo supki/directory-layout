@@ -1,7 +1,7 @@
 {-# LANGUAGE UnicodeSyntax #-}
 module System.Directory.Layout
   ( -- * Layout declaration
-    Layout, DL, file, file_, directory, directory_
+    DL, Layout, file, file_, directory, directory_
     -- * Layout construction
   , DLMakeWarning(..), make
     -- * Layout verification
@@ -12,14 +12,10 @@ module System.Directory.Layout
 
 import Data.Text (Text)
 
-import System.Directory.Layout.Internal (DL(..))
+import System.Directory.Layout.Internal (DL(..), Layout)
 import System.Directory.Layout.Check (DLCheckFailure(..), check)
 import System.Directory.Layout.Make (DLMakeWarning(..), make)
 import System.Directory.Layout.Parser (layout, layout')
-
-
--- | Type synonym is nicer
-type Layout = DL ()
 
 
 -- | Declare file with specified contents

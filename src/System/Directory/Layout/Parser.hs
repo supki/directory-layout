@@ -47,31 +47,31 @@ import System.Directory.Layout.Internal
 
 
 -- | lazy 'Text' parser
-layout ∷ LT.Text → Either String (DL ())
+layout ∷ LT.Text → Either String Layout
 layout = glayout
 
 
 -- | strict 'Text' parser
-layout' ∷ T.Text → Either String (DL ())
+layout' ∷ T.Text → Either String Layout
 layout' = glayout
 
 
-glayout ∷ Stream s Identity Char ⇒ s → Either String (DL ())
+glayout ∷ Stream s Identity Char ⇒ s → Either String Layout
 glayout = left show . parse (sequence_ <$> many (p_any 0)) "(layout parser)"
 
 
-p_any ∷ Stream s Identity Char ⇒ Int → Parsec s u (DL ())
+p_any ∷ Stream s Identity Char ⇒ Int → Parsec s u Layout
 p_any n = try (p_directory n) <|> p_file n
 
 
-p_directory ∷ Stream s Identity Char ⇒ Int → Parsec s u (DL ())
+p_directory ∷ Stream s Identity Char ⇒ Int → Parsec s u Layout
 p_directory n = do
   name ← p_directory_name
   inner ← sequence_ <$> try (inners p_any n) <|> return (E ())
   return $ D name inner (E ())
 
 
-p_file ∷ Stream s Identity Char ⇒ Int → Parsec s u (DL ())
+p_file ∷ Stream s Identity Char ⇒ Int → Parsec s u Layout
 p_file n = do
   name ← p_file_name
   inner ← Just . T.intercalate "\n" <$> try (inners (const p_text) n) <|> return Nothing
