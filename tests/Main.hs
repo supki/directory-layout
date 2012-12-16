@@ -9,7 +9,9 @@ import System.Exit (exitSuccess, exitFailure)
 
 import System.Directory.Layout
 import System.Directory.Layout.Internal
-import Test.HUnit
+import Test.HUnit hiding (assert)
+import Test.QuickCheck
+import Test.QuickCheck.Monadic
 import System.Process (rawSystem)
 
 
@@ -19,6 +21,7 @@ deriving instance Eq a ⇒ Eq (DL a)
 main ∷ IO ()
 main = do
   z ← runTestTT tests
+  quickCheck testArbitrary1
   if errors z + failures z > 0
     then exitFailure
     else exitSuccess
@@ -113,6 +116,7 @@ testTrivia2 = TestCase $ do
 
   check' = check script "directory-layout-test"
 
+
 testDual1 ∷ Test
 testDual1 = TestCase $ do
   rawSystem "mkdir" ["--parents", "directory-layout-test"]
@@ -136,6 +140,15 @@ testDual1 = TestCase $ do
   test' s = make' s >> check' s
   make' s = make s "directory-layout-test"
   check' s = check s "directory-layout-test" >>= assertEqual "dual" []
+
+
+testArbitrary1 ∷ Gen Prop
+testArbitrary1 = monadicIO . forAllM arbitrary $ \l → do
+  run (rawSystem "mkdir" ["--parents", "directory-layout-test"])
+  xs ← run (make l "directory-layout-test")
+  ys ← run (check l "directory-layout-test")
+  run (rawSystem "rm" ["-rf", "directory-layout-test"])
+  assert $ null xs && null ys
 
 
 testParsing1 ∷ Test

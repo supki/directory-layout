@@ -1,6 +1,8 @@
 name:          directory-layout
 version:       0.1.0.0
 synopsis:      Declare, construct and verify directory layout
+description:   Language to express directory layouts
+category:      System
 license:       MIT
 license-file:  LICENSE
 author:        Matvey Aksenov
@@ -20,7 +22,8 @@ library
                  filepath,
                  transformers,
                  parsec,
-                 text
+                 text,
+                 QuickCheck
   ghc-options: -Wall
                -fno-warn-unused-do-bind
 
@@ -30,13 +33,21 @@ executable layout
                  optparse-applicative,
                  directory-layout
   main-is: layout/Main.hs
+  ghc-options: -Wall
+               -fno-warn-unused-do-bind
 
 test-suite basics-suite
   type: exitcode-stdio-1.0
   build-depends: base >= 3 && < 5,
+                 directory-layout,
                  HUnit,
                  process,
-                 directory-layout
+                 QuickCheck
   main-is: tests/Main.hs
   ghc-options: -Wall
                -fno-warn-unused-do-bind
+
+
+source-repository head
+  type: git
+  location: https://github.com/supki/directory-layout

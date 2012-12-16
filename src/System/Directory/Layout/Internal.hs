@@ -4,7 +4,11 @@ module System.Directory.Layout.Internal
   ( DL(..), Layout
   ) where
 
+import Control.Applicative
+import Control.Arrow
+
 import Data.Text (Text)
+import Test.QuickCheck
 
 
 -- | Abstract data type representing directory tree is nice
@@ -30,3 +34,20 @@ instance Monad DL where
   E x >>= f = f x
   F fp c x >>= f = F fp c (x >>= f)
   D fp x y >>= f = D fp x (y >>= f)
+
+
+-- Make arbitrary layout of reasonable size
+-- Frequencies are pretty /arbitrary/ chosen with layout construction termination in mind
+instance Arbitrary a ⇒ Arbitrary (DL a) where
+  arbitrary = snd <$> generator 0
+   where
+    generator ∷ Arbitrary a ⇒ Int → Gen (Int, DL a)
+    generator n = frequency
+      [ (8, do
+          (n', g') ← generator (succ n)
+          generator n' <&> second (D (show n) g'))
+      , (20, generator (succ n) <&> second (F (show n) Nothing))
+      , (10, arbitrary <&> \r → (n, E r))
+      ]
+     where
+      (<&>) = flip fmap
