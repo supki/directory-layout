@@ -1,5 +1,5 @@
 name:          directory-layout
-version:       0.2.0.0
+version:       0.3.0.0
 synopsis:      Declare, construct and verify directory layout
 description:   Language to express directory layouts
 category:      System
@@ -14,25 +14,13 @@ library
   exposed-modules: System.Directory.Layout
                    System.Directory.Layout.Check
                    System.Directory.Layout.Make
-                   System.Directory.Layout.Parser
                    System.Directory.Layout.Internal
   hs-source-dirs: src
   build-depends: base >= 3 && < 5,
                  directory,
                  filepath,
                  transformers,
-                 parsec,
-                 text,
-                 QuickCheck
-  ghc-options: -Wall
-               -fno-warn-unused-do-bind
-
-executable layout
-  build-depends: base >= 3 && < 5,
-                 text,
-                 optparse-applicative,
-                 directory-layout
-  main-is: layout/Main.hs
+                 text
   ghc-options: -Wall
                -fno-warn-unused-do-bind
 

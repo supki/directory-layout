@@ -6,8 +6,6 @@ module System.Directory.Layout
   , DLMakeWarning(..), make
     -- * Layout verification
   , DLCheckFailure(..), check
-    -- * Layout parsers
-  , layout, layout'
   ) where
 
 import Data.Text (Text)
@@ -15,7 +13,6 @@ import Data.Text (Text)
 import System.Directory.Layout.Internal (DL(..), Layout)
 import System.Directory.Layout.Check (DLCheckFailure(..), check)
 import System.Directory.Layout.Make (DLMakeWarning(..), make)
-import System.Directory.Layout.Parser (layout, layout')
 
 
 -- | Declare file with specified contents
