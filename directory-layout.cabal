@@ -15,6 +15,7 @@ library
                    System.Directory.Layout.Check
                    System.Directory.Layout.Make
                    System.Directory.Layout.Internal
+                   System.Directory.Layout.Lens
   hs-source-dirs: src
   build-depends: base >= 3 && < 5,
                  directory,
