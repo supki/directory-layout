@@ -6,6 +6,8 @@ import Control.Applicative (Applicative(..))
 import Data.Monoid (Monoid(..))
 
 import Data.Default (Default(..))
+import Data.Functor.Apply (Apply(..))
+import Data.Functor.Bind (Bind(..))
 import Data.Semigroup (Semigroup(..))
 import Data.Text (Text)
 
@@ -48,26 +50,34 @@ instance Functor DL where
   fmap f (D fp x y) = D fp x (fmap f y)
   {-# INLINE fmap #-}
 
+instance Apply DL where
+  E f      <.> E x      = E (f x)
+  E f      <.> T t x    = T t (f x)
+  T t f    <.> E x      = T t (f x)
+  T t f    <.> T _ x    = T t (f x)
+  f        <.> F fp c x = F fp c (f <.> x)
+  f        <.> D fp l x = D fp l (f <.> x)
+  F fp c f <.> x        = F fp c (f <.> x)
+  D fp l f <.> x        = D fp l (f <.> x)
+  {-# INLINE (<.>) #-}
+
 instance Applicative DL where
   pure = E
   {-# INLINE pure #-}
 
-  E f      <*> E x      = E (f x)
-  E f      <*> T t x    = T t (f x)
-  T t f    <*> E x      = T t (f x)
-  T t f    <*> T _ x    = T t (f x)
-  f        <*> F fp c x = F fp c (f <*> x)
-  f        <*> D fp l x = D fp l (f <*> x)
-  F fp c f <*> x        = F fp c (f <*> x)
-  D fp l f <*> x        = D fp l (f <*> x)
+  (<*>) = (<.>)
   {-# INLINE (<*>) #-}
 
+instance Bind DL where
+  E x      >>- f = f x
+  T _ x    >>- f = f x
+  F fp c x >>- f = F fp c (x >>- f)
+  D fp x y >>- f = D fp x (y >>- f)
+  {-# INLINE (>>-) #-}
+
 instance Monad DL where
-  return = E
+  return = pure
   {-# INLINE return #-}
 
-  E x      >>= f = f x
-  T _ x    >>= f = f x
-  F fp c x >>= f = F fp c (x >>= f)
-  D fp x y >>= f = D fp x (y >>= f)
+  (>>=) = (>>-)
   {-# INLINE (>>=) #-}

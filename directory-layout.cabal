@@ -23,6 +23,7 @@ library
                  transformers,
                  data-default,
                  semigroups,
+                 semigroupoids,
                  lens,
                  text
   ghc-options: -Wall
