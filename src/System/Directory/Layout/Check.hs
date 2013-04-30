@@ -61,9 +61,10 @@ check z fp = do
   return xs
  where
   f (E _) = return ()
-  f (F p Nothing x) = fileExists p >> f x
-  f (F p (Just c) x) = fileExists p >>= \t → when t (fileContains p c) >> f x
+  f (F p (E _) x) = fileExists p >> f x
+  f (F p (T t _) x) = fileExists p >>= \w → when w (fileContains p t) >> f x
   f (D p x y) = dirExists p >>= \t → when t (changeDir p (f x)) >> f y
+  f _ = error "Broken DL () invariant"
 
 
 -- | Data type representing various failures

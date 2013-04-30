@@ -8,6 +8,7 @@ module System.Directory.Layout
   , DLCheckFailure(..), check
   ) where
 
+import Data.Default (def)
 import Data.Text (Text)
 
 import System.Directory.Layout.Internal (DL(..), Layout)
@@ -17,19 +18,19 @@ import System.Directory.Layout.Make (DLMakeWarning(..), make)
 
 -- | Declare file with specified contents
 file ∷ FilePath → Text → Layout
-file x c = F x (Just c) (return ())
+file x t = F x (T t ()) def
 
 
 -- | Declare empty file
 file_ ∷ FilePath → Layout
-file_ x = F x Nothing (return ())
+file_ x = F x def def
 
 
 -- | Declare directory with specified listing
 directory ∷ FilePath → Layout → Layout
-directory x d = D x d (return ())
+directory x d = D x d def
 
 
 -- | Declare empty directory
 directory_ ∷ FilePath → Layout
-directory_ x = D x (return ()) (return ())
+directory_ x = D x def def

@@ -67,9 +67,10 @@ make z fp = do
   return xs
  where
   f (E _) = return ()
-  f (F p Nothing x) = touchFile p >> f x
-  f (F p (Just c) x) = touchFile p >> infectFile p c >> f x
+  f (F p (E _) x) = touchFile p >> f x
+  f (F p (T t _) x) = touchFile p >> infectFile p t >> f x
   f (D p x y) = createDir p >> changeDir p (f x) >> f y
+  f _ = error "Broken DL () invariant"
 
 
 -- | Data type representing various warnings
