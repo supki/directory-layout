@@ -18,8 +18,8 @@ type Layout = DL ()
 data DL f
   = E f
   | T Text f
-  | F FilePath (DL ()) (DL f)
-  | D FilePath (DL ()) (DL f)
+  | F FilePath Layout (DL f)
+  | D FilePath Layout (DL f)
     deriving (Show, Read, Eq)
 
 instance Default a => Default (DL a) where

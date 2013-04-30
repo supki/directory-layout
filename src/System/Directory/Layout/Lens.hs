@@ -19,7 +19,7 @@ text = prism' (\t -> T t ()) $ \s -> case s of
 {-# INLINE text #-}
 
 
-file :: FilePath -> IndexedTraversal' FilePath (DL b) Layout
+file :: FilePath -> IndexedTraversal' FilePath Layout Layout
 file k f = go
  where
   go (E x)      = pure (E x)
@@ -32,7 +32,7 @@ file k f = go
 {-# INLINE file #-}
 
 
-directory :: FilePath -> IndexedTraversal' FilePath (DL b) Layout
+directory :: FilePath -> IndexedTraversal' FilePath Layout Layout
 directory k f = go
  where
   go (E x)      = pure (E x)
