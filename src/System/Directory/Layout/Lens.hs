@@ -1,7 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
+-- | "Control.Lens" based extractors for 'DL'
 module System.Directory.Layout.Lens
-  ( text, file, directory
+  ( -- $setup
+    text, file, directory
   ) where
 
 import Control.Applicative (pure)
@@ -13,6 +15,7 @@ import System.Directory.Layout.Internal (DL(..), Layout)
 
 
 -- $setup
+--
 -- >>> :set -XOverloadedStrings
 -- >>> import           Control.Lens
 -- >>> let layout = F "foo" (T "not empty" ()) (D "bar" (F "baz" (E ()) (F "quux" (T "something" ()) (E ()))) (F "swaks" (E ()) (E ())))
