@@ -16,6 +16,7 @@ text :: Prism Layout Layout Text Text
 text = prism' (\t -> T t ()) $ \s -> case s of
   T t _ -> Just t
   _     -> Nothing
+{-# INLINE text #-}
 
 
 file :: FilePath -> IndexedTraversal' FilePath (DL b) Layout
@@ -27,6 +28,8 @@ file k f = go
     | k == k'   = indexed f k l <&> \l' -> F k' l' x
     | otherwise = go x
   go (D _ _ x)  = go x
+  {-# INLINE go #-}
+{-# INLINE file #-}
 
 
 directory :: FilePath -> IndexedTraversal' FilePath (DL b) Layout
@@ -38,3 +41,5 @@ directory k f = go
   go (D k' l x)
     | k == k'   = indexed f k l <&> \l' -> D k' l' x
     | otherwise = go x
+  {-# INLINE go #-}
+{-# INLINE directory #-}
