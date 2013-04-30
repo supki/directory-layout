@@ -38,6 +38,17 @@ test-suite basics-suite
   ghc-options: -Wall
                -fno-warn-unused-do-bind
 
+test-suite doctests
+  type: exitcode-stdio-1.0
+  build-depends: base >= 3 && < 5,
+                 directory-layout,
+                 doctest,
+                 wordexp,
+                 lens
+  main-is: tests/doctests.hs
+  ghc-options: -Wall
+               -fno-warn-unused-do-bind
+
 
 source-repository head
   type: git

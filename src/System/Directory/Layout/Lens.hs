@@ -12,6 +12,19 @@ import Data.Text (Text)
 import System.Directory.Layout.Internal (DL(..), Layout)
 
 
+-- $setup
+-- >>> :set -XOverloadedStrings
+-- >>> import           Control.Lens
+-- >>> let layout = F "foo" (T "not empty" ()) (D "bar" (F "baz" (E ()) (F "quux" (T "something" ()) (E ()))) (F "swaks" (E ()) (E ())))
+
+
+-- |
+-- >>> layout ^? text
+-- Nothing
+-- >>> layout ^? file "foo" . text
+-- Just "not empty"
+-- >>> layout ^? directory "bar" . file "quux" . text
+-- Just "something"
 text :: Prism Layout Layout Text Text
 text = prism' (\t -> T t ()) $ \s -> case s of
   T t _ -> Just t
@@ -19,6 +32,13 @@ text = prism' (\t -> T t ()) $ \s -> case s of
 {-# INLINE text #-}
 
 
+-- |
+-- >>> layout ^? file "biz"
+-- Nothing
+-- >>> layout ^? file "swaks"
+-- Just (E ())
+-- >>> layout ^? directory "bar" . file "baz"
+-- Just (E ())
 file :: FilePath -> IndexedTraversal' FilePath Layout Layout
 file k f = go
  where
@@ -32,6 +52,10 @@ file k f = go
 {-# INLINE file #-}
 
 
+-- >>> layout ^? directory "foo"
+-- Nothing
+-- >>> layout ^? directory "bar"
+-- Just (F "baz" (E ()) (F "quux" (F "something" (E ()) (E ()))))
 directory :: FilePath -> IndexedTraversal' FilePath Layout Layout
 directory k f = go
  where
