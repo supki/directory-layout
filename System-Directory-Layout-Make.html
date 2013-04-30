@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>System.Directory.Layout.Make</title><link href="ocean.css" rel="stylesheet" type="text/css" title="Ocean" /><script src="haddock-util.js" type="text/javascript"></script><script type="text/javascript">//<![CDATA[
+window.onload = function () {pageLoad();setSynopsis("mini_System-Directory-Layout-Make.html");};
+//]]>
+</script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="src/System-Directory-Layout-Make.html">Source</a></li><li><a href="index.html">Contents</a></li><li><a href="doc-index.html">Index</a></li></ul><p class="caption">directory-layout-0.3.0.0: Declare, construct and verify directory layout</p></div><div id="content"><div id="module-header"><table class="info"><tr><th>Safe Haskell</th><td>None</td></tr></table><p class="caption">System.Directory.Layout.Make</p></div><div id="description"><p class="caption">Description</p><div class="doc"><p>Make layout as specified
+</p><p>For example, suppose you are in an empty directory
+</p><pre>
+ % tree
+ .
+</pre><p>and you've written simple layout:
+</p><pre>
+ layout = do
+   directory &quot;baz&quot; $
+     file_ &quot;twey&quot;
+   directory &quot;foo&quot; $ do
+     directory &quot;bar&quot; $ do
+       file_ &quot;quuz&quot;
+       file_ &quot;tatata&quot;
+     file_ &quot;quux&quot;
+</pre><p>then running it should result in this directory tree:
+</p><pre>
+ % tree
+ .
+ &#9500;&#9472;&#9472; baz
+ &#9474;&#160;&#160; &#9492;&#9472;&#9472; twey
+ &#9492;&#9472;&#9472; foo
+     &#9500;&#9472;&#9472; bar
+     &#9474;&#160;&#160; &#9500;&#9472;&#9472; quuz
+     &#9474;&#160;&#160; &#9492;&#9472;&#9472; tatata
+     &#9492;&#9472;&#9472; quux
+</pre></div></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"><li class="src short"><span class="keyword">data</span>  <a href="#t:DLMakeWarning">DLMakeWarning</a> <ul class="subs"><li>= <a href="#v:FileDoesExist">FileDoesExist</a> <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/System-IO.html#t:FilePath">FilePath</a>  </li><li>| <a href="#v:DirectoryDoesExist">DirectoryDoesExist</a> <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/System-IO.html#t:FilePath">FilePath</a>  </li></ul></li><li class="src short"><a href="#v:make">make</a> :: <a href="System-Directory-Layout-Internal.html#t:Layout">Layout</a> -&gt; <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/System-IO.html#t:FilePath">FilePath</a> -&gt; <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/System-IO.html#t:IO">IO</a> [<a href="System-Directory-Layout-Make.html#t:DLMakeWarning">DLMakeWarning</a>]</li></ul></div><div id="interface"><h1>Documentation</h1><div class="top"><p class="src"><span class="keyword">data</span>  <a name="t:DLMakeWarning" class="def">DLMakeWarning</a>  <a href="src/System-Directory-Layout-Make.html#DLMakeWarning" class="link">Source</a></p><div class="doc"><p>Data type representing various warnings
+ that may occur while infecting directory layout
+</p></div><div class="subs constructors"><p class="caption">Constructors</p><table><tr><td class="src"><a name="v:FileDoesExist" class="def">FileDoesExist</a> <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/System-IO.html#t:FilePath">FilePath</a></td><td class="doc empty">&nbsp;</td></tr><tr><td class="src"><a name="v:DirectoryDoesExist" class="def">DirectoryDoesExist</a> <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/System-IO.html#t:FilePath">FilePath</a></td><td class="doc empty">&nbsp;</td></tr></table></div><div class="subs instances"><p id="control.i:DLMakeWarning" class="caption collapser" onclick="toggleSection('i:DLMakeWarning')">Instances</p><div id="section.i:DLMakeWarning" class="show"><table><tr><td class="src"><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/Data-Eq.html#t:Eq">Eq</a> <a href="System-Directory-Layout-Make.html#t:DLMakeWarning">DLMakeWarning</a></td><td class="doc empty">&nbsp;</td></tr><tr><td class="src"><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/Data-Ord.html#t:Ord">Ord</a> <a href="System-Directory-Layout-Make.html#t:DLMakeWarning">DLMakeWarning</a></td><td class="doc empty">&nbsp;</td></tr><tr><td class="src"><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/Text-Read.html#t:Read">Read</a> <a href="System-Directory-Layout-Make.html#t:DLMakeWarning">DLMakeWarning</a></td><td class="doc empty">&nbsp;</td></tr><tr><td class="src"><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/Text-Show.html#t:Show">Show</a> <a href="System-Directory-Layout-Make.html#t:DLMakeWarning">DLMakeWarning</a></td><td class="doc empty">&nbsp;</td></tr></table></div></div></div><div class="top"><p class="src"><a name="v:make" class="def">make</a><a href="src/System-Directory-Layout-Make.html#make" class="link">Source</a></p><div class="subs arguments"><p class="caption">Arguments</p><table><tr><td class="src">:: <a href="System-Directory-Layout-Internal.html#t:Layout">Layout</a></td><td class="doc empty">&nbsp;</td></tr><tr><td class="src">-&gt; <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/System-IO.html#t:FilePath">FilePath</a></td><td class="doc"><p>Root directory
+</p></td></tr><tr><td class="src">-&gt; <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.1/System-IO.html#t:IO">IO</a> [<a href="System-Directory-Layout-Make.html#t:DLMakeWarning">DLMakeWarning</a>]</td><td class="doc"><p>List of warnings
+</p></td></tr></table></div><div class="doc"><p>Infect file layout with stuff from script
+</p></div></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.13.2</p></div></body></html>

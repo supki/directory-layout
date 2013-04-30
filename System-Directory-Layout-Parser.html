@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>System.Directory.Layout.Parser</title><link href="ocean.css" rel="stylesheet" type="text/css" title="Ocean" /><script src="haddock-util.js" type="text/javascript"></script><script type="text/javascript">//<![CDATA[
+window.onload = function () {pageLoad();setSynopsis("mini_System-Directory-Layout-Parser.html");};
+//]]>
+</script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="index.html">Contents</a></li><li><a href="doc-index.html">Index</a></li></ul><p class="caption">directory-layout-0.1.0.0: Declare, construct and verify directory layout</p></div><div id="content"><div id="module-header"><table class="info"><tr><th>Safe Haskell</th><td>None</td></tr></table><p class="caption">System.Directory.Layout.Parser</p></div><div id="description"><p class="caption">Description</p><div class="doc"><p>Parser for text format for DL data structure, for example
+</p><pre>
+ c/
+ ..x
+ ..y
+ ....n
+ ....n
+ ....
+ ..z
+ ....t
+ ....t
+ ....
+ d/
+</pre><p>where <code><a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Prelude.html#v:.">.</a></code> stands for space is equivalent of
+</p><pre>
+ do directory &quot;c&quot; $ do
+      file_ &quot;x&quot;
+      file &quot;y&quot; &quot;nnnn&quot;
+      file &quot;z&quot; &quot;tntn&quot;
+    directory_ &quot;d&quot;
+</pre></div></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"><li class="src short"><a href="#v:layout">layout</a> :: <a href="/home/maksenov/git/directory-layout/cabal-dev//share/doc/text-0.11.2.3/html/Data-Text-Lazy-Internal.html#t:Text">Text</a> -&gt; <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Either.html#t:Either">Either</a> <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a> <a href="System-Directory-Layout.html#t:Layout">Layout</a></li><li class="src short"><a href="#v:layout-39-">layout'</a> :: <a href="/home/maksenov/git/directory-layout/cabal-dev//share/doc/text-0.11.2.3/html/Data-Text-Internal.html#t:Text">Text</a> -&gt; <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Either.html#t:Either">Either</a> <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a> <a href="System-Directory-Layout.html#t:Layout">Layout</a></li></ul></div><div id="interface"><h1>Documentation</h1><div class="top"><p class="src"><a name="v:layout" class="def">layout</a> :: <a href="/home/maksenov/git/directory-layout/cabal-dev//share/doc/text-0.11.2.3/html/Data-Text-Lazy-Internal.html#t:Text">Text</a> -&gt; <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Either.html#t:Either">Either</a> <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a> <a href="System-Directory-Layout.html#t:Layout">Layout</a></p><div class="doc"><p>lazy <code>Text</code> parser
+</p></div></div><div class="top"><p class="src"><a name="v:layout-39-" class="def">layout'</a> :: <a href="/home/maksenov/git/directory-layout/cabal-dev//share/doc/text-0.11.2.3/html/Data-Text-Internal.html#t:Text">Text</a> -&gt; <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-Either.html#t:Either">Either</a> <a href="/usr/local/share/doc/ghc/html/libraries/base-4.6.0.0/Data-String.html#t:String">String</a> <a href="System-Directory-Layout.html#t:Layout">Layout</a></p><div class="doc"><p>strict <code>Text</code> parser
+</p></div></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.12.0</p></div></body></html>
