@@ -18,7 +18,7 @@ import System.Directory.Layout.Internal (DL(..), Layout)
 -- >>> let layout = F "foo" (T "not empty" ()) (D "bar" (F "baz" (E ()) (F "quux" (T "something" ()) (E ()))) (F "swaks" (E ()) (E ())))
 
 
--- |
+-- | Get 'Text' out of the current 'Layout' (if possible)
 -- >>> layout ^? text
 -- Nothing
 -- >>> layout ^? file "foo" . text
@@ -32,7 +32,7 @@ text = prism' (\t -> T t ()) $ \s -> case s of
 {-# INLINE text #-}
 
 
--- |
+-- | Look into the file in the current 'Layout' (if possible)
 -- >>> layout ^? file "biz"
 -- Nothing
 -- >>> layout ^? file "swaks"
@@ -52,10 +52,11 @@ file k f = go
 {-# INLINE file #-}
 
 
+-- | Go into the directory in the current 'Layout' (if possible)
 -- >>> layout ^? directory "foo"
 -- Nothing
 -- >>> layout ^? directory "bar"
--- Just (F "baz" (E ()) (F "quux" (F "something" (E ()) (E ()))))
+-- Just (F "baz" (E ()) (F "quux" (T "something" ()) (E ())))
 directory :: FilePath -> IndexedTraversal' FilePath Layout Layout
 directory k f = go
  where
