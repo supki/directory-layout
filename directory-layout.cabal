@@ -20,6 +20,8 @@ library
                  directory,
                  filepath,
                  transformers,
+                 data-default,
+                 semigroups,
                  text
   ghc-options: -Wall
                -fno-warn-unused-do-bind
