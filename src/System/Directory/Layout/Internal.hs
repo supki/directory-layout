@@ -18,10 +18,10 @@ type Layout = DL ()
 
 -- | Abstract data type representing directory tree is nice
 data DL f
-  = E f
-  | T Text f
-  | F FilePath Layout (DL f)
-  | D FilePath Layout (DL f)
+  = E !f
+  | T !Text !f
+  | F !FilePath !Layout !(DL f)
+  | D !FilePath !Layout !(DL f)
     deriving (Show, Read, Eq)
 
 instance Default a => Default (DL a) where
