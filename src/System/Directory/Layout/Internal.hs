@@ -22,7 +22,7 @@ data DL f
   | T !Text !f
   | F !FilePath !Layout !(DL f)
   | D !FilePath !Layout !(DL f)
-    deriving (Show, Read, Eq)
+    deriving (Show, Read, Eq, Ord)
 
 instance Default a => Default (DL a) where
   def = E def
