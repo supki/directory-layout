@@ -34,7 +34,7 @@
 --     └── quux
 -- @
 --
-module System.Directory.Layout.Make where
+module System.Directory.Layout.Make (make) where
 
 import Control.Monad.Reader (ReaderT, runReaderT, ask, local)
 import Control.Monad.Writer (WriterT, execWriterT)

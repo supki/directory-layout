@@ -28,9 +28,7 @@
 -- @
 --
 -- and running @check layout \".\"@ should result in @[]@
-module System.Directory.Layout.Check
-  ( check
-  ) where
+module System.Directory.Layout.Check (check) where
 
 import Prelude hiding (readFile)
 
