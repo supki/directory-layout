@@ -1,4 +1,4 @@
-{-# LANGUAGE UnicodeSyntax #-}
+-- | Language to express directory layouts
 module System.Directory.Layout
   ( -- * Layout declaration
     DL, Layout, file, file_, directory, directory_
@@ -20,24 +20,24 @@ import System.Directory.Layout.Errored (LayoutException(..))
 
 
 -- | Declare file with specified contents
-file ∷ FilePath → Text → Layout
+file :: FilePath -> Text -> Layout
 file x t = F x (T t ()) def
 {-# INLINE file #-}
 
 
 -- | Declare empty file
-file_ ∷ FilePath → Layout
+file_ :: FilePath -> Layout
 file_ x = F x def def
 {-# INLINE file_ #-}
 
 
 -- | Declare directory with specified listing
-directory ∷ FilePath → Layout → Layout
+directory :: FilePath -> Layout -> Layout
 directory x d = D x d def
 {-# INLINE directory #-}
 
 
 -- | Declare empty directory
-directory_ ∷ FilePath → Layout
+directory_ :: FilePath -> Layout
 directory_ x = D x def def
 {-# INLINE directory_ #-}

@@ -1,8 +1,16 @@
 {-# LANGUAGE FlexibleContexts #-}
-module System.Directory.Layout.Errored where
+-- | Wrappers around exception throwing functions and related routines
+module System.Directory.Layout.Errored
+  ( LayoutException(..)
+  , createDirectory, createFile
+  , fileExists, directoryExists, readFile
+  , anyfail
+  , relative
+  ) where
 
 import           Control.Exception hiding (try)
 import qualified Control.Exception as E
+import           Prelude hiding (readFile)
 import           System.IO.Error
 
 import           Control.Lens
@@ -22,6 +30,7 @@ io :: MonadIO m => IO a -> m a
 io = liftIO
 
 
+-- | Log failures
 anyfail :: MonadWriter [w] m => m (Either w a) -> m ()
 anyfail mewa = do
   ewa <- mewa
@@ -30,20 +39,23 @@ anyfail mewa = do
     _      -> return ()
 
 
+-- | Information about cought exceptions in various routines
 data LayoutException =
-    CD IOErrorType FilePath
-  | CF IOErrorType FilePath
-  | FE IOErrorType FilePath
-  | DE IOErrorType FilePath
-  | RF IOErrorType FilePath Text
+    CD IOErrorType FilePath      -- ^ 'createDirectory' exceptions
+  | CF IOErrorType FilePath      -- ^ 'createFile' eceptions
+  | FE IOErrorType FilePath      -- ^ 'fileExists' eceptions
+  | DE IOErrorType FilePath      -- ^ 'directoryExists' eceptions
+  | RF IOErrorType FilePath Text -- ^ 'readFile' eceptions
     deriving (Show, Eq)
 
 
+-- | IO-exceptions-free 'System.Directory.createDirectory'
 createDirectory :: MonadIO m => FilePath -> m (Either LayoutException ())
 createDirectory fp = io $ try (D.createDirectory fp) <&> \x -> case x of
   Right () -> Right ()
   Left  e  -> Left (CD (ioeGetErrorType e) fp)
 
+-- | IO-exceptions-free 'Data.Text.writeFile'
 createFile :: MonadIO m => FilePath -> Maybe Text -> m (Either LayoutException ())
 createFile fp text = io $ try (createFileX fp text) <&> \x -> case x of
   Right () -> Right ()
@@ -58,6 +70,7 @@ createFileX fp text = do
     T.writeFile fp (maybe T.empty id text)
 
 
+-- | 'System.Directory.doesFileExists' that returns 'Either' instead of 'Bool'
 fileExists :: MonadIO m => FilePath -> m (Either LayoutException ())
 fileExists fp = io $ do
   p <- D.doesFileExist fp
@@ -66,6 +79,7 @@ fileExists fp = io $ do
   else
     return (Left (FE doesNotExistErrorType fp))
 
+-- | 'System.Directory.doesDirectoryExists' that returns 'Either' instead of 'Bool'
 directoryExists :: MonadIO m => FilePath -> m (Either LayoutException ())
 directoryExists fp = io $ do
   p <- D.doesDirectoryExist fp
@@ -74,6 +88,7 @@ directoryExists fp = io $ do
   else
     return (Left (DE doesNotExistErrorType fp))
 
+-- | IO-exceptions-free 'Data.Text.readFile'
 readFile :: MonadIO m => FilePath -> Text -> m (Either LayoutException ())
 readFile fp text = io $ try (readFileX fp text) <&> \x -> case x of
   Right () -> Right ()
@@ -88,6 +103,7 @@ readFileX fp text = do
     return ()
 
 
+-- | Make paths in 'LayoutException' relative to given 'FilePath'
 relative :: FilePath -> LayoutException -> LayoutException
 relative r (CD t fp)   = CD t (makeRelative r fp)
 relative r (CF t fp)   = CF t (makeRelative r fp)
