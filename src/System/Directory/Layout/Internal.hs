@@ -3,7 +3,9 @@ module System.Directory.Layout.Internal
   ( DL(..), Layout
   ) where
 
-import Control.Applicative (Applicative(..))
+import Control.Applicative (Applicative(..), (<$>))
+import Data.Foldable (Foldable(..))
+import Data.Traversable (Traversable(..), fmapDefault, foldMapDefault)
 import Data.Monoid (Monoid(..))
 
 import Data.Default (Default(..))
@@ -54,10 +56,7 @@ instance Default a => Monoid (DL a) where
   {-# INLINE mappend #-}
 
 instance Functor DL where
-  fmap f (E x)      = E (f x)
-  fmap f (T t x)    = T t (f x)
-  fmap f (F fp c x) = F fp c (fmap f x)
-  fmap f (D fp x y) = D fp x (fmap f y)
+  fmap = fmapDefault
   {-# INLINE fmap #-}
 
 instance Apply DL where
@@ -91,3 +90,14 @@ instance Monad DL where
 
   (>>=) = (>>-)
   {-# INLINE (>>=) #-}
+
+instance Foldable DL where
+  foldMap = foldMapDefault
+  {-# INLINE foldMap #-}
+
+instance Traversable DL where
+  traverse f (E x)      = E      <$> f x
+  traverse f (T t x)    = T t    <$> f x
+  traverse f (F fp t x) = F fp t <$> traverse f x
+  traverse f (D fp x y) = D fp x <$> traverse f y
+  {-# INLINE traverse #-}
