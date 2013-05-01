@@ -3,17 +3,20 @@ module System.Directory.Layout
   ( -- * Layout declaration
     DL, Layout, file, file_, directory, directory_
     -- * Layout construction
-  , DLMakeWarning(..), make
+  , make
     -- * Layout verification
-  , DLCheckFailure(..), check
+  , check
+    -- * Errors
+  , LayoutException(..)
   ) where
 
 import Data.Default (def)
 import Data.Text (Text)
 
 import System.Directory.Layout.Internal (DL(..), Layout)
-import System.Directory.Layout.Check (DLCheckFailure(..), check)
-import System.Directory.Layout.Make (DLMakeWarning(..), make)
+import System.Directory.Layout.Check (check)
+import System.Directory.Layout.Make (make)
+import System.Directory.Layout.Errored (LayoutException(..))
 
 
 -- | Declare file with specified contents

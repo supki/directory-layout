@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE UnicodeSyntax #-}
 -- | Make layout as specified
 --
@@ -36,93 +37,44 @@
 --     └── quux
 -- @
 --
-module System.Directory.Layout.Make
-  ( DLMakeWarning(..), make
-  ) where
+module System.Directory.Layout.Make where
 
-import Control.Arrow (second)
-
-import           Control.Monad.Trans.Reader (ReaderT, runReaderT, ask, local)
-import           Control.Monad.Trans.Writer (WriterT, execWriterT, tell)
-import           Control.Monad.IO.Class (liftIO)
-import           Control.Monad.Trans.Class (lift)
-import           Data.Text (Text)
-import qualified Data.Text.IO as T
-import           System.FilePath ((</>), makeRelative)
-import           System.Directory
+import Control.Monad.Reader (ReaderT, runReaderT, ask, local)
+import Control.Monad.Writer (WriterT, execWriterT)
+import Data.Text (Text)
+import System.FilePath ((</>))
 
 import System.Directory.Layout.Internal
+import System.Directory.Layout.Errored
 
 
 -- | Infect file layout with stuff from script
 make ∷ Layout
-     → FilePath          -- ^ Root directory
-     → IO [DLMakeWarning] -- ^ List of warnings
-make z fp = do
-  d ← getCurrentDirectory
-  fp' ← canonicalizePath fp
-  setCurrentDirectory fp'
-  xs ← runRunT (fp', fp') (f z)
-  setCurrentDirectory d
-  return xs
+     → FilePath             -- ^ Root directory
+     → IO [LayoutException] -- ^ List of warnings
+make z fp = map (relative fp) `fmap` runRunT fp (f z)
  where
-  f (E _) = return ()
-  f (F p (E _) x) = touchFile p >> f x
-  f (F p (T t _) x) = touchFile p >> infectFile p t >> f x
-  f (D p x y) = createDir p >> changeDir p (f x) >> f y
-  f _ = error "Broken DL () invariant"
+  f (E _)           = return ()
+  f (F p (E _) x)   = makeFile p Nothing >> f x
+  f (F p (T t _) x) = makeFile p (Just t) >> f x
+  f (D p x y)       = makeDirectory p >> changeDir p (f x) >> f y
+  f _               = error "Broken DL () invariant"
 
 
--- | Data type representing various warnings
--- that may occur while infecting directory layout
-data DLMakeWarning =
-    FileDoesExist FilePath
-  | DirectoryDoesExist FilePath
-    deriving (Show, Read, Eq, Ord)
+type RunT = ReaderT FilePath (WriterT [LayoutException] IO)
 
 
-type RunT = ReaderT (FilePath, FilePath) (WriterT [DLMakeWarning] IO)
-
-
-runRunT ∷ (FilePath, FilePath) → RunT a → IO [DLMakeWarning]
+runRunT ∷ FilePath → RunT a → IO [LayoutException]
 runRunT e = execWriterT . flip runReaderT e
 
 
--- | File creation
--- emits 'FileDoesExist' if file exists already
-touchFile ∷ FilePath → RunT ()
-touchFile p = do
-  (r, d) ← ask
-  z ← io $ doesFileExist (d </> p)
-  if z
-    then tell' [FileDoesExist (makeRelative r d </> p)]
-    else io $ T.writeFile (d </> p) ""
+makeFile ∷ FilePath → Maybe Text -> RunT ()
+makeFile p t = ask >>= \d -> anyfail $ createFile (d </> p) t
 
 
-infectFile ∷ FilePath → Text → RunT ()
-infectFile p c = do
-  (_, d) ← ask
-  io $ T.writeFile (d </> p) c
-
-
--- | Directory creation
--- emits 'DirectoryDoesExist' if directory exists already
-createDir ∷ FilePath → RunT ()
-createDir p = do
-  (r, d) ← ask
-  z ← io $ doesDirectoryExist (d </> p)
-  if z
-    then tell' [DirectoryDoesExist (makeRelative r d </> p)]
-    else io $ createDirectory (d </> p)
+makeDirectory ∷ FilePath → RunT ()
+makeDirectory p = ask >>= \d -> anyfail $ createDirectory (d </> p)
 
 
 changeDir ∷ FilePath → RunT () → RunT ()
-changeDir fp = local (second (</> fp))
-
-
-io ∷ IO a → RunT a
-io = liftIO
-
-
-tell' ∷ [DLMakeWarning] → RunT ()
-tell' = lift . tell
+changeDir fp = local (</> fp)

@@ -2,7 +2,9 @@
 {-# LANGUAGE UnicodeSyntax #-}
 module Main where
 
+import Control.Exception (finally)
 import System.Exit (exitSuccess, exitFailure)
+import System.IO.Error
 
 import System.Directory.Layout
 import Test.HUnit hiding (assert)
@@ -30,22 +32,28 @@ testTrivia1 = TestCase $ do
 
   install
   rawSystem "rm" ["-rf", "directory-layout-test/x/y"]
-  check' >>= assertEqual "deleted y" [DirectoryDoesNotExist "x/y"]
+  check' >>= assertEqual "deleted y"
+    [ DE doesNotExistErrorType "x/y"
+    , FE doesNotExistErrorType "x/y/s"
+    , FE doesNotExistErrorType "x/y/v"
+    ]
 
   install
   rawSystem "rm" ["-rf", "directory-layout-test/z"]
-  check' >>= assertEqual "deleted z" [DirectoryDoesNotExist "./z"]
+  check' >>= assertEqual "deleted z"
+    [ DE doesNotExistErrorType "z"
+    , RF doesNotExistErrorType "z/w" "text"
+    ]
 
   install
   rawSystem "rm" ["-rf", "directory-layout-test/x/y/s"]
-  check' >>= assertEqual "deleted s" [FileDoesNotExist "x/y/s"]
+  check' >>= assertEqual "deleted s" [FE doesNotExistErrorType "x/y/s"]
 
   install
   writeFile "directory-layout-test/z/w" "foo"
-  check' >>= assertEqual "changed z/w" [FileWrongContents "z/w" "foo"]
-
-  rawSystem "rm" ["-rf", "file-layout-test"]
-  return ()
+  check' >>= assertEqual "changed z/w" [RF userErrorType "z/w" "text"]
+ `finally`
+  rawSystem "rm" ["-rf", "directory-layout-test"]
  where
   install = do
     rawSystem "mkdir" ["--parents", "directory-layout-test"]
@@ -75,22 +83,28 @@ testTrivia2 = TestCase $ do
 
   install
   rawSystem "rm" ["-rf", "directory-layout-test/x/y"]
-  check' >>= assertEqual "deleted y" [DirectoryDoesNotExist "x/y"]
+  check' >>= assertEqual "deleted y"
+    [ DE doesNotExistErrorType "x/y"
+    , FE doesNotExistErrorType "x/y/s"
+    , FE doesNotExistErrorType "x/y/v"
+    ]
 
   install
   rawSystem "rm" ["-rf", "directory-layout-test/z"]
-  check' >>= assertEqual "deleted z" [DirectoryDoesNotExist "./z"]
+  check' >>= assertEqual "deleted z"
+    [ DE doesNotExistErrorType "z"
+    , RF doesNotExistErrorType "z/w" "text"
+    ]
 
   install
   rawSystem "rm" ["-rf", "directory-layout-test/x/y/s"]
-  check' >>= assertEqual "deleted s" [FileDoesNotExist "x/y/s"]
+  check' >>= assertEqual "deleted s" [FE doesNotExistErrorType "x/y/s"]
 
   install
   writeFile "directory-layout-test/z/w" "foo"
-  check' >>= assertEqual "changed z/w" [FileWrongContents "z/w" "foo"]
-
+  check' >>= assertEqual "changed z/w" [RF userErrorType "z/w" "text"]
+ `finally`
   rawSystem "rm" ["-rf", "directory-layout-test"]
-  return ()
  where
   install = make script "directory-layout-test"
 
@@ -122,8 +136,8 @@ testDual1 = TestCase $ do
           file_ "yz"
         directory_ "z"
   test' s
+ `finally`
   rawSystem "rm" ["-rf", "directory-layout-test"]
-  return ()
  where
   test' s = make' s >> check' s
   make' s = make s "directory-layout-test"
