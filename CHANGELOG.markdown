@@ -5,3 +5,4 @@
 * Added "extractors" (`System.Directory.Layout.Lens`)
 * Added `Apply` and `Bind` instances for `Layout`
 * Added `Ord` instance for `Layout`
+* Added `Foldable` and `Traversable` instances for `Layout`
