@@ -28,15 +28,14 @@ instance Default a => Default (DL a) where
   def = E def
   {-# INLINE def #-}
 
-instance Semigroup a => Semigroup (DL a) where
-  E a      <> E b = E (a <> b)
+instance Semigroup (DL a) where
   E _      <> b   = b
   T _ _    <> b   = b
   F f t l  <> b   = F f t (l  <> b)
   D f l l' <> b   = D f l (l' <> b)
   {-# INLINE (<>) #-}
 
-instance (Default a, Semigroup a) => Monoid (DL a) where
+instance Default a => Monoid (DL a) where
   mempty = def
   {-# INLINE mempty #-}
 
