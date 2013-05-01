@@ -1,3 +1,4 @@
+-- | Free monad based directory layouts
 module System.Directory.Layout.Internal
   ( DL(..), Layout
   ) where
@@ -12,16 +13,26 @@ import Data.Semigroup (Semigroup(..))
 import Data.Text (Text)
 
 
--- | But type synonym is nicer
+-- | Type synonym to save some acrobatics
 type Layout = DL ()
 
 
--- | Abstract data type representing directory tree is nice
-data DL f
-  = E !f
-  | T !Text !f
-  | F !FilePath !Layout !(DL f)
-  | D !FilePath !Layout !(DL f)
+-- | Representation of directory layouts
+--
+-- Invariants:
+--
+--  * 'F' second argument is never @D _ _ _@ or @F _ _ _@ itself
+--
+--  * 'F' third argument is never @T _ _@
+--
+--  * 'D' second argument is never @T _ _@
+--
+--  * 'D' third argument is never @T _ _@
+data DL a
+  = E !a                        -- ^ Emptyness, nothing found here
+  | T !Text !a                  -- ^ File contents
+  | F !FilePath !Layout !(DL a) -- ^ File node
+  | D !FilePath !Layout !(DL a) -- ^ Directory node
     deriving (Show, Read, Eq, Ord)
 
 instance Default a => Default (DL a) where
