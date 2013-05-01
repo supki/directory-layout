@@ -13,11 +13,10 @@ cabal-version: >= 1.10
 library
   default-language: Haskell2010
   exposed-modules: System.Directory.Layout
-                   System.Directory.Layout.Check
-                   System.Directory.Layout.Make
                    System.Directory.Layout.Internal
-                   System.Directory.Layout.Lens
                    System.Directory.Layout.Errored
+                   System.Directory.Layout.Traverse
+                   System.Directory.Layout.Lens
   hs-source-dirs: src
   build-depends: base >= 3 && < 5,
                  directory,
