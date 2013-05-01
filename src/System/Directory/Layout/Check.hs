@@ -1,4 +1,3 @@
-{-# LANGUAGE UnicodeSyntax #-}
 -- | Check if current directory layout agrees with specified one
 --
 -- For example, suppose there is a tree:
@@ -45,9 +44,9 @@ import System.Directory.Layout.Errored
 
 
 -- | Check directory layout corresponds to specified one
-check ∷ Layout
-      → FilePath             -- ^ Root directory
-      → IO [LayoutException] -- ^ List of failures
+check :: Layout
+      -> FilePath             -- ^ Root directory
+      -> IO [LayoutException] -- ^ List of failures
 check z fp = map (relative fp) `fmap` runCheckT fp (f z)
  where
   f (E _)           = return ()
@@ -60,19 +59,19 @@ check z fp = map (relative fp) `fmap` runCheckT fp (f z)
 type CheckT = ReaderT FilePath (WriterT [LayoutException] IO)
 
 
-runCheckT ∷ FilePath → CheckT a → IO [LayoutException]
+runCheckT :: FilePath -> CheckT a -> IO [LayoutException]
 runCheckT e = execWriterT . flip runReaderT e
 
 
-checkFile ∷ FilePath → Maybe Text -> CheckT ()
+checkFile :: FilePath -> Maybe Text -> CheckT ()
 checkFile p t = ask >>= \d -> anyfail $ case t of
   Nothing -> fileExists (d </> p)
   Just t' -> readFile (d </> p) t'
 
 
-checkDirectory ∷ FilePath → CheckT ()
+checkDirectory :: FilePath -> CheckT ()
 checkDirectory p = ask >>= \d -> anyfail $ directoryExists (d </> p)
 
 
-changeDir ∷ FilePath → CheckT () → CheckT ()
+changeDir :: FilePath -> CheckT () -> CheckT ()
 changeDir fp = local (</> fp)

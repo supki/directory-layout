@@ -1,6 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE UnicodeSyntax #-}
 -- | Make layout as specified
 --
 -- For example, suppose you are in an empty directory
@@ -49,9 +46,9 @@ import System.Directory.Layout.Errored
 
 
 -- | Infect file layout with stuff from script
-make ∷ Layout
-     → FilePath             -- ^ Root directory
-     → IO [LayoutException] -- ^ List of warnings
+make :: Layout
+     -> FilePath             -- ^ Root directory
+     -> IO [LayoutException] -- ^ List of warnings
 make z fp = map (relative fp) `fmap` runRunT fp (f z)
  where
   f (E _)           = return ()
@@ -64,17 +61,17 @@ make z fp = map (relative fp) `fmap` runRunT fp (f z)
 type RunT = ReaderT FilePath (WriterT [LayoutException] IO)
 
 
-runRunT ∷ FilePath → RunT a → IO [LayoutException]
+runRunT :: FilePath -> RunT a -> IO [LayoutException]
 runRunT e = execWriterT . flip runReaderT e
 
 
-makeFile ∷ FilePath → Maybe Text -> RunT ()
+makeFile :: FilePath -> Maybe Text -> RunT ()
 makeFile p t = ask >>= \d -> anyfail $ createFile (d </> p) t
 
 
-makeDirectory ∷ FilePath → RunT ()
+makeDirectory :: FilePath -> RunT ()
 makeDirectory p = ask >>= \d -> anyfail $ createDirectory (d </> p)
 
 
-changeDir ∷ FilePath → RunT () → RunT ()
+changeDir :: FilePath -> RunT () -> RunT ()
 changeDir fp = local (</> fp)
