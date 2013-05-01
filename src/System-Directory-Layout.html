@@ -7,7 +7,7 @@
 <link type='text/css' rel='stylesheet' href='hscolour.css' />
 </head>
 <body>
-<pre><a name="line-1"></a><span class='hs-comment'>{-# LANGUAGE UnicodeSyntax #-}</span>
+<pre><a name="line-1"></a><span class='hs-comment'>-- | Language to express directory layouts</span>
 <a name="line-2"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span>
 <a name="line-3"></a>  <span class='hs-layout'>(</span> <span class='hs-comment'>-- * Layout declaration</span>
 <a name="line-4"></a>    <span class='hs-conid'>DL</span><span class='hs-layout'>,</span> <span class='hs-conid'>Layout</span><span class='hs-layout'>,</span> <span class='hs-varid'>file</span><span class='hs-layout'>,</span> <span class='hs-varid'>file_</span><span class='hs-layout'>,</span> <span class='hs-varid'>directory</span><span class='hs-layout'>,</span> <span class='hs-varid'>directory_</span>
@@ -29,25 +29,25 @@
 <a name="line-20"></a>
 <a name="line-21"></a>
 <a name="line-22"></a><a name="file"></a><span class='hs-comment'>-- | Declare file with specified contents</span>
-<a name="line-23"></a><span class='hs-definition'>file</span> <span class='hs-sel'>∷</span> <span class='hs-conid'>FilePath</span> <span class='hs-sel'>→</span> <span class='hs-conid'>Text</span> <span class='hs-sel'>→</span> <span class='hs-conid'>Layout</span>
+<a name="line-23"></a><span class='hs-definition'>file</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Text</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Layout</span>
 <a name="line-24"></a><span class='hs-definition'>file</span> <span class='hs-varid'>x</span> <span class='hs-varid'>t</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>F</span> <span class='hs-varid'>x</span> <span class='hs-layout'>(</span><span class='hs-conid'>T</span> <span class='hs-varid'>t</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span> <span class='hs-varid'>def</span>
 <a name="line-25"></a><span class='hs-comment'>{-# INLINE file #-}</span>
 <a name="line-26"></a>
 <a name="line-27"></a>
 <a name="line-28"></a><a name="file_"></a><span class='hs-comment'>-- | Declare empty file</span>
-<a name="line-29"></a><span class='hs-definition'>file_</span> <span class='hs-sel'>∷</span> <span class='hs-conid'>FilePath</span> <span class='hs-sel'>→</span> <span class='hs-conid'>Layout</span>
+<a name="line-29"></a><span class='hs-definition'>file_</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Layout</span>
 <a name="line-30"></a><span class='hs-definition'>file_</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>F</span> <span class='hs-varid'>x</span> <span class='hs-varid'>def</span> <span class='hs-varid'>def</span>
 <a name="line-31"></a><span class='hs-comment'>{-# INLINE file_ #-}</span>
 <a name="line-32"></a>
 <a name="line-33"></a>
 <a name="line-34"></a><a name="directory"></a><span class='hs-comment'>-- | Declare directory with specified listing</span>
-<a name="line-35"></a><span class='hs-definition'>directory</span> <span class='hs-sel'>∷</span> <span class='hs-conid'>FilePath</span> <span class='hs-sel'>→</span> <span class='hs-conid'>Layout</span> <span class='hs-sel'>→</span> <span class='hs-conid'>Layout</span>
+<a name="line-35"></a><span class='hs-definition'>directory</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Layout</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Layout</span>
 <a name="line-36"></a><span class='hs-definition'>directory</span> <span class='hs-varid'>x</span> <span class='hs-varid'>d</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>D</span> <span class='hs-varid'>x</span> <span class='hs-varid'>d</span> <span class='hs-varid'>def</span>
 <a name="line-37"></a><span class='hs-comment'>{-# INLINE directory #-}</span>
 <a name="line-38"></a>
 <a name="line-39"></a>
 <a name="line-40"></a><a name="directory_"></a><span class='hs-comment'>-- | Declare empty directory</span>
-<a name="line-41"></a><span class='hs-definition'>directory_</span> <span class='hs-sel'>∷</span> <span class='hs-conid'>FilePath</span> <span class='hs-sel'>→</span> <span class='hs-conid'>Layout</span>
+<a name="line-41"></a><span class='hs-definition'>directory_</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Layout</span>
 <a name="line-42"></a><span class='hs-definition'>directory_</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>D</span> <span class='hs-varid'>x</span> <span class='hs-varid'>def</span> <span class='hs-varid'>def</span>
 <a name="line-43"></a><span class='hs-comment'>{-# INLINE directory_ #-}</span>
 </pre></body>
