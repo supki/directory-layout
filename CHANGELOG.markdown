@@ -1,3 +1,7 @@
+0.3.1.0
+---
+* Fixed build for GHC 7.4
+
 0.3.0.0
 ----
 * Removed parser stuff
