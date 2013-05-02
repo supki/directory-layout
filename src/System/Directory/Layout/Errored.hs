@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 -- | Wrappers around exception throwing functions and related routines
 module System.Directory.Layout.Errored
@@ -11,7 +12,11 @@ module System.Directory.Layout.Errored
 import           Control.Exception hiding (try)
 import qualified Control.Exception as E
 import           Prelude hiding (readFile)
+#if __GLASGOW_HASKELL__ >= 706
 import           System.IO.Error
+#else
+import           System.IO.Error hiding (catch, try)
+#endif
 
 import           Control.Lens
 import           Control.Monad.Trans (MonadIO, liftIO)
