@@ -64,10 +64,10 @@ instance Apply DL where
   E f      <.> T t x    = T t (f x)
   T t f    <.> E x      = T t (f x)
   T t f    <.> T _ x    = T t (f x)
-  f        <.> F fp c x = F fp c (f <.> x)
-  f        <.> D fp l x = D fp l (f <.> x)
   F fp c f <.> x        = F fp c (f <.> x)
   D fp l f <.> x        = D fp l (f <.> x)
+  f        <.> F fp c x = F fp c (f <.> x)
+  f        <.> D fp l x = D fp l (f <.> x)
   {-# INLINE (<.>) #-}
 
 instance Applicative DL where
