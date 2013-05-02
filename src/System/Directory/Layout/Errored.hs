@@ -49,13 +49,13 @@ data LayoutException =
     deriving (Show, Eq)
 
 
--- | IO-exceptions-free 'System.Directory.createDirectory'
+-- | IO-exceptions-free 'D.createDirectory'
 createDirectory :: MonadIO m => FilePath -> m (Either LayoutException ())
 createDirectory fp = io $ try (D.createDirectory fp) <&> \x -> case x of
   Right () -> Right ()
   Left  e  -> Left (CD (ioeGetErrorType e) fp)
 
--- | IO-exceptions-free 'Data.Text.writeFile'
+-- | IO-exceptions-free 'T.writeFile'
 createFile :: MonadIO m => FilePath -> Maybe Text -> m (Either LayoutException ())
 createFile fp text = io $ try (createFileX fp text) <&> \x -> case x of
   Right () -> Right ()
@@ -70,7 +70,7 @@ createFileX fp text = do
     T.writeFile fp (maybe T.empty id text)
 
 
--- | 'System.Directory.doesFileExists' that returns 'Either' instead of 'Bool'
+-- | 'D.doesFileExist' that returns 'Either' instead of 'Bool'
 fileExists :: MonadIO m => FilePath -> m (Either LayoutException ())
 fileExists fp = io $ do
   p <- D.doesFileExist fp
@@ -79,7 +79,7 @@ fileExists fp = io $ do
   else
     return (Left (FE doesNotExistErrorType fp))
 
--- | 'System.Directory.doesDirectoryExists' that returns 'Either' instead of 'Bool'
+-- | 'D.doesDirectoryExist' that returns 'Either' instead of 'Bool'
 directoryExists :: MonadIO m => FilePath -> m (Either LayoutException ())
 directoryExists fp = io $ do
   p <- D.doesDirectoryExist fp
@@ -88,7 +88,7 @@ directoryExists fp = io $ do
   else
     return (Left (DE doesNotExistErrorType fp))
 
--- | IO-exceptions-free 'Data.Text.readFile'
+-- | IO-exceptions-free 'T.readFile'
 readFile :: MonadIO m => FilePath -> Text -> m (Either LayoutException ())
 readFile fp text = io $ try (readFileX fp text) <&> \x -> case x of
   Right () -> Right ()
