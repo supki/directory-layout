@@ -17,7 +17,7 @@ import System.Directory.Layout.Internal (DL(..), Layout)
 -- $setup
 --
 -- >>> :set -XOverloadedStrings
--- >>> import           Control.Lens
+-- >>> import Control.Lens
 -- >>> let layout = F "foo" (T "not empty" ()) (D "bar" (F "baz" (E ()) (F "quux" (T "something" ()) (E ()))) (F "swaks" (E ()) (E ())))
 
 
