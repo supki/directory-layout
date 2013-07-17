@@ -1,3 +1,7 @@
+0.3.2.0
+---
+* Added `Layout` construction from existing directories via `fromDirectory`
+
 0.3.1.0
 ---
 * Fixed build for GHC 7.4
