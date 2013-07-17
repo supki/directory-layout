@@ -19,7 +19,7 @@ import Data.Text (Text)
 type Layout = DL ()
 
 
--- | Representation of directory layouts
+-- | A representation of directory layouts
 --
 -- Invariants:
 --
