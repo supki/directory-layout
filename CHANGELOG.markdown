@@ -1,13 +1,18 @@
-0.3.2.0
----
+0.4.0.0
+-------
+* Self-balancing `Semigroup`,`Apply`,`Applicative`,`Bind`, and `Monad` instance for `Node`.
+  That way we have reasonable auto-derived `Eq` and `Ord` instances
+
+0.3.2.0 (never released)
+-------
 * Added `Layout` construction from existing directories via `fromDirectory`
 
 0.3.1.0
----
+-------
 * Fixed build for GHC 7.4
 
 0.3.0.0
-----
+-------
 * Removed parser stuff
 * Added `Default`, `Semigroup`, `Monoid`, and `Applicative` instances for `Layout`
 * Added "extractors" (`System.Directory.Layout.Lens`)
