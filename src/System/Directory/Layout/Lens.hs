@@ -2,7 +2,9 @@
 {-# LANGUAGE RankNTypes #-}
 -- | "Control.Lens" based extractors for 'Layout'
 module System.Directory.Layout.Lens
-  ( text, name, names, next, file, directory, node
+  ( -- * Usage
+    -- $setup
+    text, name, names, next, file, directory, node
   ) where
 
 import Control.Applicative ((<$>), (<*>), pure)
