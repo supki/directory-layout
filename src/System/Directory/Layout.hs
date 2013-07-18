@@ -1,7 +1,7 @@
 -- | Language to express directory layouts
 module System.Directory.Layout
   ( -- * Layout declaration
-    DL, Layout, file, file_, directory, directory_
+    Node, Layout, file, file_, directory, directory_
     -- * Layout construction
   , fromDirectory
     -- * Layout traverses
@@ -20,7 +20,7 @@ import qualified System.Directory as D
 import           System.FilePath (combine)
 import           System.FilePath.Lens (filename)
 
-import System.Directory.Layout.Internal (DL(..), Layout)
+import System.Directory.Layout.Internal (Node(..), Layout)
 import System.Directory.Layout.Traverse (make, check)
 import System.Directory.Layout.Errored (LayoutException(..))
 

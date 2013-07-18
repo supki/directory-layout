@@ -11,7 +11,7 @@ import Control.Applicative (pure)
 import Control.Lens
 import Data.Text (Text)
 
-import System.Directory.Layout.Internal (DL(..), Layout)
+import System.Directory.Layout.Internal (Node(..), Layout)
 
 
 -- $setup
