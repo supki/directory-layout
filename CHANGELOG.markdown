@@ -2,6 +2,7 @@
 -------
 * Self-balancing `Semigroup`,`Apply`,`Applicative`,`Bind`, and `Monad` instance for `Node`.
   That way we have reasonable auto-derived `Eq` and `Ord` instances
+* Added `name`, `names`, `next`, `node` traversals and fixed `file` and `directory`
 
 0.3.2.0 (never released)
 -------
