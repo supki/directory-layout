@@ -61,6 +61,19 @@ test-suite doctests
     -Wall
     -fno-warn-unused-do-bind
 
+test-suite layout-laws
+  default-language: Haskell2010
+  type: exitcode-stdio-1.0
+  build-depends:
+    base >= 3 && < 5,
+    directory-layout,
+    hspec,
+    semigroups
+  main-is: tests/Hspec.hs
+  ghc-options:
+    -Wall
+    -fno-warn-unused-do-bind
+
 
 source-repository head
   type: git

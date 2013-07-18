@@ -110,7 +110,7 @@ a >>* b =
 --
 -- Bind (@<-@) in that do-notation is useless at best
 -- (You only can get @()@s from 'Layout') and harmful at worst
--- (If you create your own 'Node' values with something more
+-- (If you manage to create your own 'Node' values with something more
 -- interesting than @()@)
 instance Monad Node where
   return = pure
