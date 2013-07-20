@@ -54,11 +54,11 @@ changeDir fp = local (</> fp)
 -- % tree
 -- .
 -- ├── baz
--- │   └── twey
+-- │   └── twey
 -- └── foo
 --     ├── bar
---     │   ├── quuz
---     │   └── tatata
+--     │   ├── quuz
+--     │   └── tatata
 --     └── quux
 -- @
 --
@@ -88,11 +88,11 @@ makeDirectory p = ask >>= \d -> anyfail $ createDirectory (d </> p)
 -- % tree
 -- .
 -- ├── baz
--- │   └── twey
+-- │   └── twey
 -- └── foo
 --     ├── bar
---     │   ├── quuz
---     │   └── tatata
+--     │   ├── quuz
+--     │   └── tatata
 --     └── quux
 -- @
 --
