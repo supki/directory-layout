@@ -13,7 +13,6 @@ module System.Directory.Layout
 import           Control.Lens
 import           Control.Monad ((>=>))
 import qualified Control.Exception as E
-import           Data.Default (def)
 import           Data.Monoid (mconcat)
 import           Data.Text (Text)
 import qualified System.Directory as D
@@ -27,25 +26,25 @@ import System.Directory.Layout.Errored (LayoutException(..))
 
 -- | Declare file with specified contents
 file :: FilePath -> Text -> Layout
-file x t = F x (T t ()) def
+file x t = F x (T t ()) (return ())
 {-# INLINE file #-}
 
 
 -- | Declare empty file
 file_ :: FilePath -> Layout
-file_ x = F x def def
+file_ x = F x (return ()) (return ())
 {-# INLINE file_ #-}
 
 
 -- | Declare directory with specified listing
 directory :: FilePath -> Layout -> Layout
-directory x d = D x d def
+directory x d = D x d (return ())
 {-# INLINE directory #-}
 
 
 -- | Declare empty directory
 directory_ :: FilePath -> Layout
-directory_ x = D x def def
+directory_ x = D x (return ()) (return ())
 {-# INLINE directory_ #-}
 
 
@@ -68,7 +67,7 @@ fromDirectory = E.try . (D.canonicalizePath >=> traverseDirectory)
       (True, _) -> return (file_ (path^.filename))
       (_, True) -> traverseDirectory path
       -- Should be pretty rare in practice: broken symlinks and stuff
-      (_, _)    -> return def
+      (_, _)    -> return (return ())
 
   getDirectoryContents :: FilePath -> IO [FilePath]
   getDirectoryContents = fmap (filter (not . (`elem` [".", ".."]))) . D.getDirectoryContents

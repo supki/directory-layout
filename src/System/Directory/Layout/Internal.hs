@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeFamilies #-}
 -- | Free monad based directory layouts
 module System.Directory.Layout.Internal
   ( Node(..), Layout
@@ -5,15 +6,13 @@ module System.Directory.Layout.Internal
 
 import Control.Applicative (Applicative(..), (<$>))
 import Data.Foldable (Foldable(..))
-import Data.Traversable (Traversable(..), fmapDefault, foldMapDefault)
-import Data.Monoid (Monoid(..))
-import Unsafe.Coerce (unsafeCoerce)
-
-import Data.Default (Default(..))
 import Data.Functor.Apply (Apply(..))
 import Data.Functor.Bind (Bind(..))
+import Data.Monoid (Monoid(..))
 import Data.Semigroup (Semigroup(..))
 import Data.Text (Text)
+import Data.Traversable (Traversable(..), fmapDefault, foldMapDefault)
+import Unsafe.Coerce (unsafeCoerce)
 
 
 -- | Type synonym to save some acrobatics
@@ -51,16 +50,12 @@ compareFilePath _          (F _ _ _)   = GT
 compareFilePath (D fp _ _) (D fp' _ _) = compare fp fp'
 {-# INLINE compareFilePath #-}
 
-instance Default a => Default (Node a) where
-  def = E def
-  {-# INLINE def #-}
-
 instance Semigroup (Node a) where
   (<>) = (>>)
   {-# INLINE (<>) #-}
 
-instance Default a => Monoid (Node a) where
-  mempty = def
+instance () ~ a => Monoid (Node a) where
+  mempty = return ()
   {-# INLINE mempty #-}
 
   mappend = (<>)
