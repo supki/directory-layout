@@ -3,7 +3,7 @@ version:       0.4.0.1
 synopsis:      Declare, construct and verify directory layout
 description:   Language to express directory layouts
 category:      System
-license:       MIT
+license:       BSD3
 license-file:  LICENSE
 author:        Matvey Aksenov
 maintainer:    matvey.aksenov@gmail.com
