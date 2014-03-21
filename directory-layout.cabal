@@ -39,6 +39,24 @@ library
     -Wall
     -fno-warn-unused-do-bind
 
+test-suite spec
+  default-language:
+    Haskell2010
+  type:
+    exitcode-stdio-1.0
+  build-depends:
+      base              >= 3 && < 5
+    , directory-layout
+    , hspec
+    , semigroups
+  main-is:
+    Spec.hs
+  hs-source-dirs:
+    tests
+  ghc-options:
+    -Wall
+    -fno-warn-unused-do-bind
+
 test-suite basics-suite
   default-language:
     Haskell2010
@@ -68,22 +86,6 @@ test-suite doctests
     , wordexp
   main-is:
     tests/doctests.hs
-  ghc-options:
-    -Wall
-    -fno-warn-unused-do-bind
-
-test-suite layout-laws
-  default-language:
-    Haskell2010
-  type:
-    exitcode-stdio-1.0
-  build-depends:
-      base              >= 3 && < 5
-    , directory-layout
-    , hspec
-    , semigroups
-  main-is:
-    tests/Hspec.hs
   ghc-options:
     -Wall
     -fno-warn-unused-do-bind
