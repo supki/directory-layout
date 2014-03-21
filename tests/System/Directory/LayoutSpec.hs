@@ -1,67 +1,137 @@
-module System.Directory.LayoutSpec where
+{-# LANGUAGE OverloadedStrings #-}
+module System.Directory.LayoutSpec (spec) where
 
-import Control.Monad ((>=>))
-import Data.Semigroup ((<>))
+import Control.Exception (finally)
 import System.Directory.Layout
+import System.IO.Error
+import System.Process (rawSystem)
 import Test.Hspec
+import Test.Hspec.HUnit
+import Test.HUnit
+
+{-# ANN module ("HLint: ignore Reduce duplication" :: String) #-}
 
 
 spec :: Spec
 spec = do
-  describe "basic equalities" $ do
-    it "is sane" $ do
-      layout_0 == layout_1  `shouldBe` False
-      layout_1 == layout_1' `shouldBe` True
+ fromHUnitTest (TestLabel "trivia1" testTrivia1)
+ fromHUnitTest (TestLabel "trivia2" testTrivia2)
+ fromHUnitTest (TestLabel "dual1" testDual1)
 
-  describe "laws" $ do
-    describe "left and right indentities" $ do
-      it "holds for layout 0" $ do
-        (layout_0 >>= return) `shouldBe` layout_0
-        (return () >>= \() -> layout_0) `shouldBe` layout_0
+testTrivia1 :: Test
+testTrivia1 = TestCase $ do
+  install
+  check' >>= assertEqual "correct" []
 
-      it "holds for layout 1" $ do
-        (layout_1 >>= return) `shouldBe` layout_1
-        (return () >>= \() -> layout_1) `shouldBe` layout_1
+  install
+  rawSystem "rm" ["-rf", "directory-layout-test/x/y"]
+  check' >>= assertEqual "deleted y"
+    [ DE doesNotExistErrorType "x/y"
+    , FE doesNotExistErrorType "x/y/s"
+    , FE doesNotExistErrorType "x/y/v"
+    ]
 
-    describe "associativity" $ do
-      it "holds for layouts 2 and 3" $ do
-        layout_2 (>>) `shouldBe` layout_3 (>>)
+  install
+  rawSystem "rm" ["-rf", "directory-layout-test/z"]
+  check' >>= assertEqual "deleted z"
+    [ DE doesNotExistErrorType "z"
+    , RF doesNotExistErrorType "z/w" "text"
+    ]
 
-      it "holds for layouts 4 and 5" $ do
-        layout_4 () `shouldBe` layout_5 ()
+  install
+  rawSystem "rm" ["-rf", "directory-layout-test/x/y/s"]
+  check' >>= assertEqual "deleted s" [FE doesNotExistErrorType "x/y/s"]
 
-    describe "semigroup instance associativity" $ do
-      it "holds for layouts 2 and 3" $ do
-        layout_2 (<>) `shouldBe` layout_3 (<>)
+  install
+  writeFile "directory-layout-test/z/w" "foo"
+  check' >>= assertEqual "changed z/w" [RF userErrorType "z/w" "text"]
+ `finally`
+  rawSystem "rm" ["-rf", "directory-layout-test"]
+ where
+  install = do
+    rawSystem "mkdir" ["--parents", "directory-layout-test"]
+    rawSystem "mkdir" ["--parents", "directory-layout-test/x/y"]
+    rawSystem "mkdir" ["--parents", "directory-layout-test/z"]
+    rawSystem "touch" ["directory-layout-test/x/y/s"]
+    rawSystem "touch" ["directory-layout-test/x/y/v"]
+    rawSystem "touch" ["directory-layout-test/z/w"]
+    writeFile "directory-layout-test/z/w" "text"
 
-layout_0, layout_1, layout_1' :: Layout
-layout_0 = do
-  file_ "foo"
-  file_ "bar"
-  file_ "baz"
-layout_1 = do
-  file_ "foo"
-  file_ "bar"
-  directory "quux" $ do
-    file_ "zem"
-    file_ "zek"
-  file_ "baz"
-layout_1' = do
-  file_ "foo"
-  file_ "bar"
-  directory "quux" $ do
-    file_ "zek"
-    file_ "zem"
-  file_ "baz"
+  script = do
+    directory "x" $
+      directory "y" $ do
+        file_ "s"
+        file_ "v"
+    directory "z" $
+      file "w" "text"
 
-layout_2, layout_3 :: (Layout -> Layout -> Layout) -> Layout
-layout_2 (#) =
-  (file_ "foo" # file_ "bar") # file_ "baz"
-layout_3 (#) =
-  file_ "foo" # (file_ "bar" # file_ "baz")
+  check' = check script "directory-layout-test"
 
-layout_4, layout_5 :: () -> Layout
-layout_4 =
-  (const (file_ "foo") >=> const (file_ "bar")) >=> const (file_ "baz")
-layout_5 =
-  const (file_ "foo") >=> (const (file_ "bar") >=> const (file_ "baz"))
+
+testTrivia2 :: Test
+testTrivia2 = TestCase $ do
+  rawSystem "mkdir" ["--parents", "directory-layout-test"]
+  install
+  check' >>= assertEqual "correct" []
+
+  install
+  rawSystem "rm" ["-rf", "directory-layout-test/x/y"]
+  check' >>= assertEqual "deleted y"
+    [ DE doesNotExistErrorType "x/y"
+    , FE doesNotExistErrorType "x/y/s"
+    , FE doesNotExistErrorType "x/y/v"
+    ]
+
+  install
+  rawSystem "rm" ["-rf", "directory-layout-test/z"]
+  check' >>= assertEqual "deleted z"
+    [ DE doesNotExistErrorType "z"
+    , RF doesNotExistErrorType "z/w" "text"
+    ]
+
+  install
+  rawSystem "rm" ["-rf", "directory-layout-test/x/y/s"]
+  check' >>= assertEqual "deleted s" [FE doesNotExistErrorType "x/y/s"]
+
+  install
+  writeFile "directory-layout-test/z/w" "foo"
+  check' >>= assertEqual "changed z/w" [RF userErrorType "z/w" "text"]
+ `finally`
+  rawSystem "rm" ["-rf", "directory-layout-test"]
+ where
+  install = make script "directory-layout-test"
+
+  script = do
+    directory "x" $
+      directory "y" $ do
+        file_ "s"
+        file_ "v"
+    directory "z" $
+      file "w" "text"
+
+  check' = check script "directory-layout-test"
+
+
+testDual1 :: Test
+testDual1 = TestCase $ do
+  rawSystem "mkdir" ["--parents", "directory-layout-test"]
+  let s = do
+        directory "x" $ do
+          directory_ "xx"
+          directory "xy" $
+            file "xyx" "test1"
+          file "xz" "test2"
+          file "xz'" "test3"
+          file_ "xz''"
+        directory "y" $ do
+          file "yx" "test4"
+          file "yy" "test5"
+          file_ "yz"
+        directory_ "z"
+  test' s
+ `finally`
+  rawSystem "rm" ["-rf", "directory-layout-test"]
+ where
+  test' s = make' s >> check' s
+  make' s = make s "directory-layout-test"
+  check' s = check s "directory-layout-test" >>= assertEqual "dual" []

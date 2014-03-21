@@ -48,27 +48,13 @@ test-suite spec
       base              >= 3 && < 5
     , directory-layout
     , hspec
+    , HUnit
+    , process
     , semigroups
   main-is:
     Spec.hs
   hs-source-dirs:
     tests
-  ghc-options:
-    -Wall
-    -fno-warn-unused-do-bind
-
-test-suite basics-suite
-  default-language:
-    Haskell2010
-  type:
-    exitcode-stdio-1.0
-  build-depends:
-      base              >= 3 && < 5
-    , directory-layout
-    , HUnit
-    , process
-    , QuickCheck
-  main-is: tests/Main.hs
   ghc-options:
     -Wall
     -fno-warn-unused-do-bind
