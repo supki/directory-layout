@@ -5,6 +5,7 @@ import Control.Exception (finally)
 import System.Directory.Layout
 import System.IO.Error
 import System.Process (rawSystem)
+import System.Unix.Directory (withWorkingDirectory)
 import Test.Hspec
 import Test.Hspec.HUnit
 import Test.HUnit
@@ -99,7 +100,7 @@ testTrivia2 = TestCase $ do
  `finally`
   rawSystem "rm" ["-rf", "directory-layout-test"]
  where
-  install = make script "directory-layout-test"
+  install = withWorkingDirectory "directory-layout-test" (make script)
 
   script = do
     directory "x" $
@@ -133,5 +134,5 @@ testDual1 = TestCase $ do
   rawSystem "rm" ["-rf", "directory-layout-test"]
  where
   test' s = make' s >> check' s
-  make' s = make s "directory-layout-test"
+  make' s = withWorkingDirectory "directory-layout-test" (make s)
   check' s = check s "directory-layout-test" >>= assertEqual "dual" []

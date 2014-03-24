@@ -50,6 +50,7 @@ test-suite spec
     , HUnit
     , process
     , semigroups
+    , Unixutils
   main-is:
     Spec.hs
   hs-source-dirs:
