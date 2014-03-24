@@ -48,7 +48,13 @@ changeDir fp = local (</> fp)
 --     file_ \"quux\"
 -- @
 --
--- then running it should result in this directory tree:
+-- then running
+--
+-- @
+-- make layout
+-- @
+--
+-- should result in this directory structure:
 --
 -- @
 -- % tree
@@ -63,9 +69,8 @@ changeDir fp = local (</> fp)
 -- @
 --
 make :: Layout
-     -> FilePath             -- ^ Root directory
      -> IO [LayoutException] -- ^ List of warnings
-make = applyTraverse go
+make l = applyTraverse go l "."
  where
   go (E _)           = return ()
   go (F p (E _) x)   = makeFile p Nothing >> go x

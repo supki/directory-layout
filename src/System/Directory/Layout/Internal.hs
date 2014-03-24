@@ -101,7 +101,7 @@ a >>* b =
       D f l _ -> D f l b
 {-# INLINE (>>*) #-}
 
--- | All this crazy stuff is only to get do-notation basically.
+-- | All the crazy stuff here is only to get do-notation essentially.
 --
 -- Bind (@<-@) in that do-notation is useless at best
 -- (You only can get @()@s from 'Layout') and harmful at worst
