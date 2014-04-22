@@ -27,12 +27,12 @@ data Node a =
     deriving (Show, Read, Eq, Ord)
 
 compareFilePath :: Node a -> Node b -> Ordering
-compareFilePath (E _)      (E _)       = EQ
-compareFilePath (E _)      _           = LT
-compareFilePath _          (E _)       = GT
+compareFilePath (E {})     (E {})      = EQ
+compareFilePath (E {})     _           = LT
+compareFilePath _          (E {})      = GT
 compareFilePath (F fp _ _) (F fp' _ _) = compare fp fp'
-compareFilePath (F _ _ _)  _           = LT
-compareFilePath _          (F _ _ _)   = GT
+compareFilePath (F {})     _           = LT
+compareFilePath _          (F {})      = GT
 compareFilePath (D fp _ _) (D fp' _ _) = compare fp fp'
 {-# INLINE compareFilePath #-}
 
