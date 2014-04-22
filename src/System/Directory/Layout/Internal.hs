@@ -4,7 +4,7 @@ module System.Directory.Layout.Internal
   ( Node(..), Layout
   ) where
 
-import Control.Applicative (Applicative(..), (<$>))
+import Control.Applicative
 import Data.Foldable (Foldable(..))
 import Data.Functor.Apply (Apply(..))
 import Data.Functor.Bind (Bind(..))
@@ -12,7 +12,6 @@ import Data.Monoid (Monoid(..))
 import Data.Semigroup (Semigroup(..))
 import Data.Text (Text)
 import Data.Traversable (Traversable(..), fmapDefault, foldMapDefault)
-import Unsafe.Coerce (unsafeCoerce)
 
 
 -- | Type synonym to save some acrobatics
@@ -75,7 +74,7 @@ instance Bind Node where
 a >>* b =
   case compareFilePath a b of
     GT -> case b of
-      E _      -> unsafeCoerce a
+      E x      -> x <$ a
       F f t l  -> F f t (a >>* l)
       D f l l' -> D f l (a >>* l')
     _  -> case a of
@@ -97,7 +96,7 @@ instance Monad Node where
   a >> b =
     case compareFilePath a b of
       GT -> case b of
-        E _      -> unsafeCoerce a
+        E x      -> x <$ a
         F f t l  -> F f t (a >> l)
         D f l l' -> D f l (a >> l')
       _  -> case a of
