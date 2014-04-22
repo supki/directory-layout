@@ -72,11 +72,9 @@ make :: Layout
      -> IO [LayoutException] -- ^ List of warnings
 make l = applyTraverse go l "."
  where
-  go (E _)           = return ()
-  go (F p (E _) x)   = makeFile p Nothing >> go x
-  go (F p (T t _) x) = makeFile p (Just t) >> go x
-  go (D p x y)       = makeDirectory p >> changeDir p (go x) >> go y
-  go _               = error "Broken DL () invariant"
+  go (E _)     = return ()
+  go (F p t x) = makeFile p t >> go x
+  go (D p x y) = makeDirectory p >> changeDir p (go x) >> go y
 
 makeFile :: FilePath -> Maybe Text -> RunT ()
 makeFile p t = ask >>= \d -> anyfail $ createFile (d </> p) t
@@ -121,11 +119,9 @@ check :: Layout
 check = applyTraverse go
  where
   go :: Layout -> RunT ()
-  go (E _)           = return ()
-  go (F p (E _) x)   = checkFile p Nothing >> go x
-  go (F p (T t _) x) = checkFile p (Just t) >> go x
-  go (D p x y)       = checkDirectory p >> changeDir p (go x) >> go y
-  go _               = error "Broken DL () invariant"
+  go (E _)     = return ()
+  go (F p t x) = checkFile p t >> go x
+  go (D p x y) = checkDirectory p >> changeDir p (go x) >> go y
 
 checkFile :: FilePath -> Maybe Text -> RunT ()
 checkFile p t = ask >>= \d -> anyfail $ case t of

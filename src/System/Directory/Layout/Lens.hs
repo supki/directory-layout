@@ -4,7 +4,7 @@
 module System.Directory.Layout.Lens
   ( -- * Usage
     -- $setup
-    text, name, names, next, file, directory, node
+    name, names, next, file, directory
   ) where
 
 import Control.Applicative ((<$>), (<*>), pure)
@@ -19,22 +19,8 @@ import System.Directory.Layout.Internal (Node(..), Layout)
 --
 -- >>> :set -XOverloadedStrings
 -- >>> import Control.Lens
--- >>> let layout = F "foo" (T "not empty" ()) (D "bar" (F "baz" (E ()) (F "quux" (T "something" ()) (E ()))) (F "swaks" (E ()) (E ())))
+-- >>> let layout = F "foo" (Just "not empty") (D "bar" (F "baz" Nothing (F "quux" (Just "something") (E ()))) (F "swaks" Nothing (E ())))
 
-
--- | Target 'Text' from the current 'Layout' top (if possible)
---
--- >>> layout ^? text
--- Nothing
--- >>> layout ^? file "foo" . text
--- Just "not empty"
--- >>> layout ^? directory "bar" . file "quux" . text
--- Just "something"
-text :: Prism' Layout Text
-text = prism' (\t -> T t ()) $ \s -> case s of
-  T t _ -> Just t
-  _     -> Nothing
-{-# INLINE text #-}
 
 -- | Target 'FilePath' from the current 'Layout' top (if possible)
 --
@@ -45,12 +31,11 @@ text = prism' (\t -> T t ()) $ \s -> case s of
 -- >>> layout ^? directory "quux" . name
 -- Nothing
 -- >>> layout & name .~ "boo"
--- F "boo" (T "not empty" ()) (D "bar" (F "baz" (E ()) (F "quux" (T "something" ()) (E ()))) (F "swaks" (E ()) (E ())))
+-- F "boo" (Just "not empty") (D "bar" (F "baz" Nothing (F "quux" (Just "something") (E ()))) (F "swaks" Nothing (E ())))
 name :: Traversal' Layout FilePath
 name f = go
  where
   go (E x)   = pure (E x)
-  go (T t x) = pure (T t x)
   go (F n l x) = f n <&> \n' -> F n' l x
   go (D n l x) = f n <&> \n' -> D n' l x
 {-# INLINE name #-}
@@ -64,12 +49,11 @@ name f = go
 -- >>> layout ^.. directory "bar" . names
 -- ["baz","quux"]
 -- >>> layout & directory "bar" . names %~ reverse
--- F "foo" (T "not empty" ()) (D "bar" (F "zab" (E ()) (F "xuuq" (T "something" ()) (E ()))) (F "swaks" (E ()) (E ())))
+-- F "foo" (Just "not empty") (D "bar" (F "zab" Nothing (F "xuuq" (Just "something") (E ()))) (F "swaks" Nothing (E ())))
 names :: Traversal' Layout FilePath
 names f = go
  where
   go (E x)   = pure (E x)
-  go (T t x) = pure (T t x)
   go (F n l x) = (\n' x' -> F n' l x') <$> f n <*> go x
   go (D n l x) = (\n' x' -> D n' l x') <$> f n <*> go x
 {-# INLINE names #-}
@@ -88,7 +72,6 @@ next :: Traversal' Layout Layout
 next f = go
  where
   go (E x)   = pure (E x)
-  go (T t x) = pure (T t x)
   go (F n l x) = f x <&> \x' -> F n l x'
   go (D n l x) = f x <&> \x' -> D n l x'
 {-# INLINE next #-}
@@ -98,14 +81,13 @@ next f = go
 -- >>> layout ^? file "biz"
 -- Nothing
 -- >>> layout ^? file "swaks"
--- Just (E ())
+-- Just Nothing
 -- >>> layout ^? directory "bar" . file "baz"
--- Just (E ())
-file :: FilePath -> IndexedTraversal' FilePath Layout Layout
+-- Just Nothing
+file :: FilePath -> IndexedTraversal' FilePath Layout (Maybe Text)
 file k f = go
  where
   go (E x)      = pure (E x)
-  go (T t x)    = pure (T t x)
   go (F k' l x)
     | k == k'   = indexed f k l <&> \l' -> F k' l' x
     | otherwise = go x <&> \x' -> F k' l x'
@@ -117,35 +99,13 @@ file k f = go
 -- >>> layout ^? directory "foo"
 -- Nothing
 -- >>> layout ^? directory "bar"
--- Just (F "baz" (E ()) (F "quux" (T "something" ()) (E ())))
+-- Just (F "baz" Nothing (F "quux" (Just "something") (E ())))
 directory :: FilePath -> IndexedTraversal' FilePath Layout Layout
 directory k f = go
  where
   go (E x)      = pure (E x)
-  go (T t x)    = pure (T t x)
   go (F n l x)  = go x <&> \x' -> F n l x'
   go (D k' l x)
     | k == k'   = indexed f k l <&> \l' -> D k' l' x
     | otherwise = go x <&> \x' -> D k' l x'
 {-# INLINE directory #-}
-
--- | Target 'Layout' under the current 'Layout' top
---
--- >>> layout ^? node "foo"
--- Just (T "not empty" ())
--- >>> layout ^? node "bar"
--- Just (F "baz" (E ()) (F "quux" (T "something" ()) (E ())))
--- >>> layout ^? node "what"
--- Nothing
-node :: FilePath -> IndexedTraversal' FilePath Layout Layout
-node k f = go
- where
-  go (E x)      = pure (E x)
-  go (T t x)    = pure (T t x)
-  go (F k' l x)
-    | k == k'   = indexed f k l <&> \l' -> F k' l' x
-    | otherwise = go x <&> \x' -> F k' l x'
-  go (D k' l x)
-    | k == k'   = indexed f k l <&> \l' -> D k' l' x
-    | otherwise = go x <&> \x' -> D k' l x'
-{-# INLINE node #-}

@@ -26,13 +26,13 @@ import System.Directory.Layout.Errored (LayoutException(..))
 
 -- | Declare file with specified contents
 file :: FilePath -> Text -> Layout
-file x t = F x (T t ()) (return ())
+file x t = F x (Just t) (return ())
 {-# INLINE file #-}
 
 
 -- | Declare empty file
 file_ :: FilePath -> Layout
-file_ x = F x (return ()) (return ())
+file_ x = F x Nothing (return ())
 {-# INLINE file_ #-}
 
 
