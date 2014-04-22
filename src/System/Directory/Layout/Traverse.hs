@@ -81,7 +81,7 @@ makeFile :: FilePath -> Maybe Text -> RunT ()
 makeFile p t = ask >>= \d -> anyfail $ createFile (d </> p) t
 
 makeLink :: FilePath -> String -> RunT ()
-makeLink p s = ask >>= \d -> anyfail $ createLink s (d </> p)
+makeLink p s = ask >>= \d -> anyfail $ createLink (d </> p) s
 
 makeDirectory :: FilePath -> RunT ()
 makeDirectory p = ask >>= \d -> anyfail $ createDirectory (d </> p)
