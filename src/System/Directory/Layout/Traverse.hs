@@ -118,9 +118,8 @@ makeDirectory p = ask >>= \d -> anyfail $ createDirectory (d </> p)
 --
 -- and running @check layout \".\"@ should result in @[]@
 check :: Layout
-      -> FilePath             -- ^ Root directory
       -> IO [LayoutException] -- ^ List of failures
-check = applyTraverse go
+check l = applyTraverse go l "."
  where
   go :: Layout -> RunT ()
   go (E _)     = return ()
