@@ -83,12 +83,7 @@ a >>* b =
       D f l _ -> D f l b
 {-# INLINE (>>*) #-}
 
--- | All the crazy stuff here is only to get do-notation essentially.
---
--- Bind (@<-@) in that do-notation is useless at best
--- (You only can get @()@s from 'Layout') and harmful at worst
--- (If you manage to create your own 'Node' values with something more
--- interesting than @()@)
+-- | All the crazy stuff here (and in @(>>-)@) is only to get do-notation essentially.
 instance Monad Node where
   return = pure
   {-# INLINE return #-}
