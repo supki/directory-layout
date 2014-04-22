@@ -1,7 +1,7 @@
 -- | Language to express directory layouts
 module System.Directory.Layout
   ( -- * Layout declaration
-    Node, Layout, file, file_, directory, directory_
+    Node, Layout, link, file, file_, directory, directory_
     -- * Layout construction
   , fromDirectory
     -- * Layout traverses
@@ -22,6 +22,11 @@ import           System.FilePath.Lens (filename)
 import System.Directory.Layout.Internal (Node(..), Layout)
 import System.Directory.Layout.Traverse (make, check)
 import System.Directory.Layout.Errored (LayoutException(..))
+
+-- | Declare a symbolic link
+link :: FilePath -> String -> Layout
+link x s = L x s (return ())
+{-# INLINE link #-}
 
 
 -- | Declare file with specified contents

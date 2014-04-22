@@ -22,6 +22,7 @@ type Layout = Node ()
 data Node a =
     E a                              -- ^ emptyness
   | F FilePath (Maybe Text) (Node a) -- ^ file name and contents
+  | L FilePath String (Node a)       -- ^ link name and the source
   | D FilePath Layout (Node a)       -- ^ directory name and contents
     deriving (Show, Read, Eq, Ord)
 
@@ -29,6 +30,9 @@ compareFilePath :: Node a -> Node b -> Ordering
 compareFilePath (E {})     (E {})      = EQ
 compareFilePath (E {})     _           = LT
 compareFilePath _          (E {})      = GT
+compareFilePath (L fp _ _) (L fp' _ _) = compare fp fp'
+compareFilePath (L {})     _           = LT
+compareFilePath _          (L {})      = GT
 compareFilePath (F fp _ _) (F fp' _ _) = compare fp fp'
 compareFilePath (F {})     _           = LT
 compareFilePath _          (F {})      = GT
@@ -66,6 +70,7 @@ instance Applicative Node where
 
 instance Bind Node where
   E x         >>- f = f x
+  n@(L _ _ x) >>- f = n >>* (x >>- f)
   n@(F _ _ x) >>- f = n >>* (x >>- f)
   n@(D _ _ x) >>- f = n >>* (x >>- f)
   {-# INLINE (>>-) #-}
@@ -75,10 +80,12 @@ a >>* b =
   case compareFilePath a b of
     GT -> case b of
       E x      -> x <$ a
+      L f s l  -> L f s (a >>* l)
       F f t l  -> F f t (a >>* l)
       D f l l' -> D f l (a >>* l')
     _  -> case a of
       E _     -> b
+      L f s _ -> L f s b
       F f t _ -> F f t b
       D f l _ -> D f l b
 {-# INLINE (>>*) #-}
@@ -92,10 +99,12 @@ instance Monad Node where
     case compareFilePath a b of
       GT -> case b of
         E x      -> x <$ a
+        L f s l  -> L f s (a >> l)
         F f t l  -> F f t (a >> l)
         D f l l' -> D f l (a >> l')
       _  -> case a of
         E _      -> b
+        L f s l  -> L f s (l  >> b)
         F f t l  -> F f t (l  >> b)
         D f l l' -> D f l (l' >> b)
   {-# INLINE (>>) #-}
@@ -109,6 +118,7 @@ instance Foldable Node where
 
 instance Traversable Node where
   traverse f (E x)      = E      <$> f x
+  traverse f (L fp s x) = L fp s <$> traverse f x
   traverse f (F fp t x) = F fp t <$> traverse f x
   traverse f (D fp x y) = D fp x <$> traverse f y
   {-# INLINE traverse #-}

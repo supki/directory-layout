@@ -74,10 +74,14 @@ make l = applyTraverse go l "."
  where
   go (E _)     = return ()
   go (F p t x) = makeFile p t >> go x
+  go (L p s x) = makeLink p s >> go x
   go (D p x y) = makeDirectory p >> changeDir p (go x) >> go y
 
 makeFile :: FilePath -> Maybe Text -> RunT ()
 makeFile p t = ask >>= \d -> anyfail $ createFile (d </> p) t
+
+makeLink :: FilePath -> String -> RunT ()
+makeLink p s = ask >>= \d -> anyfail $ createLink s (d </> p)
 
 makeDirectory :: FilePath -> RunT ()
 makeDirectory p = ask >>= \d -> anyfail $ createDirectory (d </> p)
@@ -121,12 +125,18 @@ check = applyTraverse go
   go :: Layout -> RunT ()
   go (E _)     = return ()
   go (F p t x) = checkFile p t >> go x
+  go (L p s x) = checkLink p s >> go x
   go (D p x y) = checkDirectory p >> changeDir p (go x) >> go y
 
 checkFile :: FilePath -> Maybe Text -> RunT ()
 checkFile p t = ask >>= \d -> anyfail $ case t of
   Nothing -> fileExists (d </> p)
   Just t' -> readFile (d </> p) t'
+
+checkLink :: FilePath -> String -> RunT ()
+checkLink p s = ask >>= \d -> do
+  anyfail $ fileExists (d </> p)
+  anyfail $ checkSource (d </> p) s
 
 checkDirectory :: FilePath -> RunT ()
 checkDirectory p = ask >>= \d -> anyfail $ directoryExists (d </> p)
