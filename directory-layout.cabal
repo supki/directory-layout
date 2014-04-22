@@ -54,7 +54,7 @@ test-suite spec
   main-is:
     Spec.hs
   hs-source-dirs:
-    tests
+    test
   ghc-options:
     -Wall
     -fno-warn-unused-do-bind
@@ -70,8 +70,10 @@ test-suite doctests
     , doctest
     , lens
     , wordexp
+  hs-source-dirs:
+    test
   main-is:
-    tests/doctests.hs
+    doctests.hs
   ghc-options:
     -Wall
     -fno-warn-unused-do-bind
