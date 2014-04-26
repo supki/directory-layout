@@ -1,0 +1,85 @@
+name:                directory-layout
+version:             0.6.0.0
+synopsis:            Directory layout DSL
+-- description:         
+license:             BSD3
+license-file:        LICENSE
+author:              Matvey Aksenov
+maintainer:          matvey.aksenov@gmail.com
+category:            System
+build-type:          Simple
+cabal-version:       >=1.10
+extra-source-files:
+  README.md
+  CHANGELOG.md
+
+library
+  default-language:
+    Haskell2010
+  build-depends:
+      base >= 4.6
+    , bifunctors
+    , bytestring
+    , directory
+    , filepath
+    , free
+    , hspec
+    , lens >= 4
+    , semigroups
+    , text
+    , transformers
+    , unix
+    , unordered-containers
+  exposed-modules:
+    System.Directory.Layout
+    System.Directory.Layout.Internal
+    System.Directory.Layout.Interpreter
+  hs-source-dirs:
+    src
+  ghc-options:
+    -Wall
+
+test-suite doctest
+  default-language:
+    Haskell2010
+  type:
+    exitcode-stdio-1.0
+  build-depends:
+      base          == 4.*
+    , directory
+    , doctest
+    , filepath
+  hs-source-dirs:
+    test
+  main-is:
+    Doctest.hs
+
+test-suite spec
+  default-language:
+    Haskell2010
+  type:
+    exitcode-stdio-1.0
+  build-depends:
+      base >= 4.6
+    , bifunctors
+    , bytestring
+    , directory
+    , filepath
+    , free
+    , hspec
+    , lens >= 4
+    , semigroups
+    , text
+    , transformers
+    , unix
+    , unordered-containers
+    , Unixutils
+  hs-source-dirs:
+    src
+    test
+  main-is:
+    Spec.hs
+  other-modules:
+    System.Directory.LayoutSpec
+    System.Directory.Layout.InternalSpec
+    System.Directory.Layout.InterpreterSpec
