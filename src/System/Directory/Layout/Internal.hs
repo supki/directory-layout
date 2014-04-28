@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
@@ -21,7 +22,9 @@ import           Data.Semigroup (Semigroup(..))
 import           Data.String (IsString(..))
 import           Data.Word (Word8)
 import           Data.Text (Text)
+#if __GLASGOW_HASKELL__ >= 708
 import           GHC.Exts (IsList(..))
+#endif
 import           GHC.Generics (Generic)
 import           System.FilePath ((</>))
 import qualified System.Posix as Posix
@@ -48,10 +51,12 @@ data Contents =
 instance IsString Contents where
   fromString = T . fromString
 
+#if __GLASGOW_HASKELL__ >= 708
 instance IsList Contents where
   type Item Contents = Word8
   fromList = B . ByteString.pack
   toList = error "Contents.toList: not implemented"
+#endif
 
 -- | Auxiliary data
 data Aux = Aux (Maybe Posix.UserID) (Maybe Posix.GroupID) (Maybe Posix.FileMode)
