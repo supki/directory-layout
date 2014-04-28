@@ -69,6 +69,24 @@ spec = do
             & contents .~ [1, 2, 3, 4]
         r `shouldBe` errors [FitBadFileContents (p </> "foo") [1, 2, 3, 4] [5, 6, 7, 8]]
 
+    it "tests copy file contents" $ do
+      temporary $ \p -> do
+        ByteString.writeFile (p </> "foo") (ByteString.pack [1, 2, 3, 4])
+        ByteString.writeFile (p </> "bar") (ByteString.pack [5, 6, 7, 8])
+        r <- fit p $ do
+          file "foo"
+            & contents .~ copyOf (p </> "bar")
+        r `shouldBe` errors [FitBadFileContents (p </> "foo") (copyOf (p </> "bar")) (copyOf (p </> "foo"))]
+
+    it "tests copy file contents" $ do
+      temporary $ \p -> do
+        ByteString.writeFile (p </> "foo") (ByteString.pack [1, 2, 3, 4])
+        ByteString.writeFile (p </> "bar") (ByteString.pack [1, 2, 3, 4])
+        r <- fit p $ do
+          file "foo"
+            & contents .~ copyOf (p </> "bar")
+        r `shouldBe` errors []
+
     it "tests symbolic link existence" $ do
       temporary $ \p -> do
         r <- fit p $ do
@@ -158,6 +176,13 @@ spec = do
       makefit $
         file "foo"
           & contents .~ "bar"
+
+    it "creates a copy of the file with the specified text" $ do
+      temporary $ \p -> do
+        writeFile (p </> "qux") "quux"
+        makefit $
+          file "foo"
+            & contents .~ copyOf (p </> "qux")
 
     it "creates two files with the specified text" $ do
       makefit $ do

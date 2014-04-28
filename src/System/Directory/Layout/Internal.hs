@@ -45,7 +45,8 @@ data F a =
 data Contents =
     B ByteString
   | T Text
-  | W
+  | C FilePath
+  | A
     deriving (Eq, Typeable, Data, Generic)
 
 instance IsString Contents where
@@ -83,7 +84,7 @@ instance Semigroup (Layout a) where
 --
 -- >>> let layout = file "foo"
 file :: String -> Layout ()
-file name = L (liftF (F name W defaux ()))
+file name = L (liftF (F name A defaux ()))
 
 -- | Symbolic link
 --
@@ -142,11 +143,17 @@ binary = B
 text :: Text -> Contents
 text = T
 
+-- | Contents are the copy of whose of the real file
+--
+-- >>> let layout = file "foo" & contents .~ copyOf "/home/user/.vimrc"
+copyOf :: FilePath -> Contents
+copyOf = C
+
 -- | Anything
 --
 -- >>> let layout = file "foo" & contents .~ anything
 anything :: Contents
-anything = W
+anything = A
 
 -- | An optic into symbolic link source
 --

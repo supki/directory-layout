@@ -17,6 +17,7 @@ module System.Directory.Layout
   , Contents
   , binary
   , text
+  , copyOf
   , anything
   , source
   , exists

@@ -38,7 +38,7 @@ spec = do
       (file "foo" & contents .~ [1..10]) `shouldBe` L (liftF (F "foo" [1..10] defaux ()))
 
     it "can change contents of the file to anything!" $
-      (file "foo" & contents .~ anything) `shouldBe` L (liftF (F "foo" W defaux ()))
+      (file "foo" & contents .~ anything) `shouldBe` L (liftF (F "foo" A defaux ()))
 
   describe "source" $ do
     it "can change source of the symlink to the specified string" $
