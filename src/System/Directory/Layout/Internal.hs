@@ -17,7 +17,7 @@ import qualified Data.ByteString as ByteString
 import           Data.Data (Data, Typeable)
 import           Data.Foldable (Foldable)
 import qualified Data.HashMap.Strict as HashMap
-import           Data.Monoid ((<>))
+import           Data.Semigroup (Semigroup(..))
 import           Data.String (IsString(..))
 import           Data.Word (Word8)
 import           Data.Text (Text)
@@ -70,6 +70,9 @@ instance Eq (Layout a) where
       HashMap.singleton (root </> n) (() <$ t) <> go (root </> n) is <> go root m
     go _ (Free E) = HashMap.empty
     go _ (Pure _) = HashMap.empty
+
+instance Semigroup (Layout a) where
+  (<>) = (>>)
 
 -- | Regular file with some contents or empty
 --
