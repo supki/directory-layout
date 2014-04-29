@@ -62,11 +62,11 @@ prettyF (SL name s _ _ _) = printf "‘%s’, a link to ‘%s’" name s
 prettyF (D name _ _ _) = '/' : name
 prettyF E = ""
 
-prettyC :: Contents -> String
-prettyC (B _) = "raw bytes"
-prettyC (T _) = "text"
-prettyC (C p) = printf "(copy of ‘%s’)" p
-prettyC A = "whatever"
+prettyC :: Maybe Contents -> String
+prettyC (Just (Binary _)) = "raw bytes"
+prettyC (Just (Text _)) = "text"
+prettyC (Just (CopyOf p)) = printf "(copy of ‘%s’)" p
+prettyC Nothing = "anything"
 
 -- | Interpret the directory layout as a 'Spec'
 spec :: FilePath -> Layout a -> Spec
@@ -91,11 +91,11 @@ specF root = go where
   go f@(D (combine root -> fullpath) _ _ _) = it (printf "has a subdirectory ‘%s’" fullpath) (fitIO root f)
   go E = return ()
 
-examplesC :: Contents -> String
-examplesC (B _) = "binary"
-examplesC (T _) = "plain text"
-examplesC (C p) = printf "(copy of ‘%s’)" p
-examplesC A = "regular"
+examplesC :: Maybe Contents -> String
+examplesC (Just (Binary _)) = "binary"
+examplesC (Just (Text _)) = "plain text"
+examplesC (Just (CopyOf p)) = printf "(copy of ‘%s’)" p
+examplesC Nothing = "regular"
 
 validate
   :: Exception e
@@ -119,21 +119,20 @@ fit = validate fitIO
 fitIO :: FilePath -> F a -> IO ()
 fitIO root = go where
   go (F (combine root -> fullpath) cs a _) = do
-    case cs of
-      B bs -> do
+    for_ cs $ \cs' -> case cs' of
+      Binary bs -> do
         real <- ByteString.readFile fullpath
         when (real /= bs) $
-          throwIO (FitBadFileContents fullpath cs (B real))
-      T t -> do
+          throwIO (FitBadFileContents fullpath cs' (binary real))
+      Text t -> do
         real <- Text.readFile fullpath
         when (real /= t) $
-          throwIO (FitBadFileContents fullpath cs (T real))
-      C realfile -> do
+          throwIO (FitBadFileContents fullpath cs' (text real))
+      CopyOf realfile -> do
         real <- ByteStringLazy.readFile realfile
         copy <- ByteStringLazy.readFile fullpath
         when (real /= copy) $
-          throwIO (FitBadFileContents fullpath cs (C fullpath))
-      A -> return ()
+          throwIO (FitBadFileContents fullpath cs' (copyOf fullpath))
     fitIOAux a fullpath
   go (SL (combine root -> fullpath) s e a _) = do
     path <- Posix.readSymbolicLink fullpath
@@ -177,10 +176,10 @@ instance Show FitError where
     , printf "  %s" (showC actual)
     ]
    where
-    showC (B bs) = printf "%s" (show (ByteString.unpack bs))
-    showC (T t) = printf "%s" (show t)
-    showC (C p) = printf "a file at ‘%s’" p
-    showC A = "whatever" -- that's not going to end up in the error messages anyway
+    showC :: Contents -> String
+    showC (Binary bs) = printf "%s" (show (ByteString.unpack bs))
+    showC (Text t) = printf "%s" (show t)
+    showC (CopyOf p) = printf "a file at ‘%s’" p
   show (FitBadLinkSource path expected actual) = unlines $
     [ printf "Bad symlink source at ‘%s’" path
     , "expected:"
@@ -227,10 +226,10 @@ makeIO :: FilePath -> F a -> IO ()
 makeIO root = go where
   go (F (combine root -> fullpath) cs a _) = do
     case cs of
-      B bs -> ByteString.writeFile fullpath bs
-      T t -> Text.writeFile fullpath t
-      C p -> ByteStringLazy.readFile p >>= ByteStringLazy.writeFile fullpath
-      A -> ByteString.writeFile fullpath (ByteString.pack [])
+      Just (Binary bs) -> ByteString.writeFile fullpath bs
+      Just (Text t) -> Text.writeFile fullpath t
+      Just (CopyOf p) -> ByteStringLazy.readFile p >>= ByteStringLazy.writeFile fullpath
+      Nothing -> ByteString.writeFile fullpath (ByteString.pack [])
     makeIOAux a fullpath
   go (SL (combine root -> fullpath) s _ a _) = do
     Posix.createSymbolicLink s fullpath

@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
 module System.Directory.Layout.InterpreterSpec
   ( spec
@@ -43,7 +42,7 @@ spec = do
       temporary $ \p -> do
         r <- fit p $ do
           file "foo"
-            & contents .~ text "bar"
+            & contents ?~ text "bar"
         r `shouldBe` errors [FitIOException (p </> "foo") doesNotExistErrorType]
 
     it "tests text file contents" $ do
@@ -51,14 +50,14 @@ spec = do
         writeFile (p </> "foo") "foo"
         r <- fit p $ do
           file "foo"
-            & contents .~ text "bar"
+            & contents ?~ text "bar"
         r `shouldBe` errors [FitBadFileContents (p </> "foo") (text "bar") (text "foo")]
 
     it "tests binary file existence" $ do
       temporary $ \p -> do
         r <- fit p $ do
           file "foo"
-            & contents .~ [1, 2, 3, 4]
+            & contents ?~ binary (ByteString.pack [1, 2, 3, 4])
         r `shouldBe` errors [FitIOException (p </> "foo") doesNotExistErrorType]
 
     it "tests binary file contents" $ do
@@ -66,8 +65,12 @@ spec = do
         ByteString.writeFile (p </> "foo") (ByteString.pack [5, 6, 7, 8])
         r <- fit p $ do
           file "foo"
-            & contents .~ [1, 2, 3, 4]
-        r `shouldBe` errors [FitBadFileContents (p </> "foo") [1, 2, 3, 4] [5, 6, 7, 8]]
+            & contents ?~ binary (ByteString.pack [1, 2, 3, 4])
+        r `shouldBe` errors
+         [ FitBadFileContents (p </> "foo")
+             (binary (ByteString.pack [1, 2, 3, 4]))
+             (binary (ByteString.pack [5, 6, 7, 8]))
+         ]
 
     it "tests copy file contents" $ do
       temporary $ \p -> do
@@ -75,7 +78,7 @@ spec = do
         ByteString.writeFile (p </> "bar") (ByteString.pack [5, 6, 7, 8])
         r <- fit p $ do
           file "foo"
-            & contents .~ copyOf (p </> "bar")
+            & contents ?~ copyOf (p </> "bar")
         r `shouldBe` errors [FitBadFileContents (p </> "foo") (copyOf (p </> "bar")) (copyOf (p </> "foo"))]
 
     it "tests copy file contents" $ do
@@ -84,7 +87,7 @@ spec = do
         ByteString.writeFile (p </> "bar") (ByteString.pack [1, 2, 3, 4])
         r <- fit p $ do
           file "foo"
-            & contents .~ copyOf (p </> "bar")
+            & contents ?~ copyOf (p </> "bar")
         r `shouldBe` errors []
 
     it "tests symbolic link existence" $ do
@@ -106,7 +109,7 @@ spec = do
         r <- fit p $ do
           file "foo"
           file "bar"
-            & contents .~ text "quux"
+            & contents ?~ text "quux"
           file "baz"
         r `shouldBe` errors
           [ FitIOException (p </> "foo") doesNotExistErrorType
@@ -122,7 +125,7 @@ spec = do
           dirs ["xyz", "xyzzy"] $ do
             file "foo"
             file "bar"
-              & contents .~ text "quux"
+              & contents ?~ text "quux"
           dir "boo" $
             file "hoo"
         r `shouldBe` errors
@@ -175,28 +178,28 @@ spec = do
     it "creates a file with the specified text" $ do
       makefit $
         file "foo"
-          & contents .~ "bar"
+          & contents ?~ text "bar"
 
     it "creates a copy of the file with the specified text" $ do
       temporary $ \p -> do
         writeFile (p </> "qux") "quux"
         makefit $
           file "foo"
-            & contents .~ copyOf (p </> "qux")
+            & contents ?~ copyOf (p </> "qux")
 
     it "creates two files with the specified text" $ do
       makefit $ do
         file "foo"
-          & contents .~ "bar"
+          & contents ?~ text "bar"
         file "qux"
-          & contents .~ "quux"
+          & contents ?~ text "quux"
 
     it "creates two files and a symlink" $ do
       makefit $ do
         file "foo"
-          & contents .~ "bar"
+          & contents ?~ text "bar"
         file "qux"
-          & contents .~ "quux"
+          & contents ?~ text "quux"
         symlink "boo" "hoo"
 
     it "creates a directory with a file" $ do
@@ -208,34 +211,34 @@ spec = do
       makefit $
         dir "foo" $ do
           file "qux"
-            & contents .~ [104, 101, 108, 108, 111]
+            & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
           file "quux"
-            & contents .~ [98, 121, 101]
+            & contents ?~ binary (ByteString.pack [98, 121, 101])
 
     it "creates a nested directory with two files" $ do
       makefit $
         dirs ["foo", "bar"] $ do
           file "qux"
-            & contents .~ [104, 101, 108, 108, 111]
+            & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
           file "quux"
-            & contents .~ [98, 121, 101]
+            & contents ?~ binary (ByteString.pack [98, 121, 101])
 
     it "creates a nested directory with two files and a directory" $ do
       makefit $
         dirs ["foo", "bar"] $ do
           file "qux"
-            & contents .~ [104, 101, 108, 108, 111]
+            & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
           file "quux"
-            & contents .~ [98, 121, 101]
+            & contents ?~ binary (ByteString.pack [98, 121, 101])
 
     it "creates a tree of directories with files" $ do
       makefit $
         dir "foo" $ do
           dir "bar" $ do
             file "qux"
-              & contents .~ [104, 101, 108, 108, 111]
+              & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
             file "quux"
-              & contents .~ [98, 121, 101]
+              & contents ?~ binary (ByteString.pack [98, 121, 101])
           dir "baz" $
             symlink "boo" "hoo"
 
@@ -243,7 +246,7 @@ spec = do
       temporary $ \p -> do
         r <- make p $
           file "qux"
-            & contents .~ [104, 101, 108, 108, 111]
+            & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
             & user ?~ 0
         r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
 
@@ -258,7 +261,7 @@ spec = do
       temporary $ \p -> do
         r <- make p $
           file "qux"
-            & contents .~ [104, 101, 108, 108, 111]
+            & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
             & group ?~ 0
         r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
 
@@ -272,7 +275,7 @@ spec = do
     it "changes the file permissions" $ do
       makefit $
         file "qux"
-          & contents .~ [104, 101, 108, 108, 111]
+          & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
           & mode ?~ 0o100777
 
     it "changes the directory permissions" $ do
@@ -284,23 +287,25 @@ spec = do
       makefit $ do
         dir "foo" $
           file "qux"
-            & contents .~ [104, 101, 108, 108, 111]
+            & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
         dir "foo" $
           file "quux"
-            & contents .~ [98, 121, 101]
+            & contents ?~ binary (ByteString.pack [98, 121, 101])
 
     it "the latter write wins" $ do
       temporary $ \p -> do
         let l = do
               dir "foo" $
                 file "qux"
-                  & contents .~ [104, 101, 108, 108, 111]
+                  & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
               dir "foo" $
                 file "qux"
-                  & contents .~ [98, 121, 101]
+                  & contents ?~ binary (ByteString.pack [98, 121, 101])
         _ <- make p l
         fit p l `shouldReturn` errors
-          [ FitBadFileContents (p </> "foo" </> "qux") [104, 101, 108, 108, 111] [98, 121, 101]
+          [ FitBadFileContents (p </> "foo" </> "qux")
+              (binary (ByteString.pack [104, 101, 108, 108, 111]))
+              (binary (ByteString.pack [98, 121, 101]))
           ]
 
 tonel :: a -> Validation (NonEmpty a) b

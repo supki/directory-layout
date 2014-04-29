@@ -35,7 +35,7 @@ newtype Layout a = L { unL :: Free F a }
 
 -- | The underlying 'Functor'
 data F a =
-    F String Contents Aux a
+    F String (Maybe Contents) Aux a
   | SL String FilePath Bool Aux a
   | D String a Aux a
   | E
@@ -43,19 +43,18 @@ data F a =
 
 -- | Regular file contents
 data Contents =
-    B ByteString
-  | T Text
-  | C FilePath
-  | A
+    Binary ByteString
+  | Text Text
+  | CopyOf FilePath
     deriving (Eq, Typeable, Data, Generic)
 
 instance IsString Contents where
-  fromString = T . fromString
+  fromString = Text . fromString
 
 #if __GLASGOW_HASKELL__ >= 708
 instance IsList Contents where
   type Item Contents = Word8
-  fromList = B . ByteString.pack
+  fromList = Binary . ByteString.pack
   toList = error "Contents.toList: not implemented"
 #endif
 
@@ -84,7 +83,7 @@ instance Semigroup (Layout a) where
 --
 -- >>> let layout = file "foo"
 file :: String -> Layout ()
-file name = L (liftF (F name A defaux ()))
+file name = L (liftF (F name anything defaux ()))
 
 -- | Symbolic link
 --
@@ -126,7 +125,7 @@ defaux :: Aux
 defaux = Aux Nothing Nothing Nothing
 
 -- | An optic into file contents
-contents :: Traversal' (Layout a) Contents
+contents :: Traversal' (Layout a) (Maybe Contents)
 contents f (L (Free (F n cs a x@(Pure _)))) = f cs <&> \cs' -> L (Free (F n cs' a x))
 contents _ l = pure l
 {-# INLINE contents #-}
@@ -135,25 +134,25 @@ contents _ l = pure l
 --
 -- >>> let layout = file "foo" & contents .~ binary (ByteString.pack [1..10])
 binary :: ByteString -> Contents
-binary = B
+binary = Binary
 
 -- | Plain text contents
 --
 -- >>> let layout = file "foo" & contents .~ text (Data.Text.pack "hello")
 text :: Text -> Contents
-text = T
+text = Text
 
 -- | Contents are the copy of whose of the real file
 --
 -- >>> let layout = file "foo" & contents .~ copyOf "/home/user/.vimrc"
 copyOf :: FilePath -> Contents
-copyOf = C
+copyOf = CopyOf
 
 -- | Anything
 --
 -- >>> let layout = file "foo" & contents .~ anything
-anything :: Contents
-anything = A
+anything :: Maybe a
+anything = Nothing
 
 -- | An optic into symbolic link source
 --

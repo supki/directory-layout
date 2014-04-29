@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedLists #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -6,12 +5,13 @@ module System.Directory.Layout.InternalSpec
   ( spec
   ) where
 
-import Control.Lens
-import Control.Monad.Free
-import Data.Char (toUpper)
-import Test.Hspec
+import           Control.Lens
+import           Control.Monad.Free
+import qualified Data.ByteString as ByteString
+import           Data.Char (toUpper)
+import           Test.Hspec
 
-import System.Directory.Layout.Internal
+import           System.Directory.Layout.Internal
 
 deriving instance Show Contents
 deriving instance Show a => Show (F a)
@@ -25,20 +25,22 @@ spec = do
       l1 `shouldBe` l2
 
     it "does care about the file contents" $
-      (l1 & into "bar".focus "baz".contents .~ "baz'es innards") == l2 `shouldBe` False
+      (l1 & into "bar".focus "baz".contents ?~ "baz'es innards") == l2 `shouldBe` False
 
     it "does care about the link source" $
       (l1 & focus "xyzzy".source.mapped %~ toUpper) == l2 `shouldBe` False
 
   describe "contents" $ do
     it "can change contents of the file to the specified text" $
-      (file "foo" & contents .~ "bar") `shouldBe` L (liftF (F "foo" "bar" defaux ()))
+      (file "foo" & contents ?~ "bar") `shouldBe` L (liftF (F "foo" (Just "bar") defaux ()))
 
     it "can change contents of the file to the specified bytes" $ do
-      (file "foo" & contents .~ [1..10]) `shouldBe` L (liftF (F "foo" [1..10] defaux ()))
+      (file "foo" & contents ?~ binary (ByteString.pack [1..10]))
+     `shouldBe`
+      L (liftF (F "foo" (Just (binary (ByteString.pack [1..10]))) defaux ()))
 
     it "can change contents of the file to anything!" $
-      (file "foo" & contents .~ anything) `shouldBe` L (liftF (F "foo" A defaux ()))
+      (file "foo" & contents .~ anything) `shouldBe` L (liftF (F "foo" anything defaux ()))
 
   describe "source" $ do
     it "can change source of the symlink to the specified string" $
@@ -51,10 +53,10 @@ spec = do
             file "bar"
             file "baz"
 
-      (l & focus "bar".contents .~ "qux") `shouldBe` do
+      (l & focus "bar".contents ?~ "qux") `shouldBe` do
          file "foo"
          file "bar"
-           & contents .~ "qux"
+           & contents ?~ "qux"
          file "baz"
 
     it "can focus a file inside the directory" $ do
@@ -63,11 +65,11 @@ spec = do
               dir "bar" $
                 file "baz"
 
-      (l & into "foo".into "bar".focus "baz".contents .~ "qux") `shouldBe` do
+      (l & into "foo".into "bar".focus "baz".contents ?~ "qux") `shouldBe` do
          dir "foo" $
            dir "bar" $
              file "baz"
-               & contents .~ "qux"
+               & contents ?~ "qux"
 
     it "can focus a directory" $ do
       let l = do
@@ -87,18 +89,18 @@ l1 = do
   dir "bar" $ do
     file "baz"
     file "qux"
-      & contents .~ "qux's innards"
+      & contents ?~ "qux's innards"
     file "quux"
-      & contents .~ "quux's innards"
+      & contents ?~ "quux's innards"
   file "xyz"
   symlink "xyzzy" "yzzyx"
 l2 = do
   dir "bar" $ do
     file "baz"
     file "quux"
-      & contents .~ "quux's innards"
+      & contents ?~ "quux's innards"
     file "qux"
-      & contents .~ "qux's innards"
+      & contents ?~ "qux's innards"
   file "foo"
   symlink "xyzzy" "yzzyx"
   file "xyz"

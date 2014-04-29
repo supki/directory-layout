@@ -30,7 +30,7 @@ project = do
         file "InterpreterSpec.hs"
       file "LayoutSpec.hs"
     file "Spec.hs"
-      & contents .~ "{-# OPTIONS_GHC -F -pgmF hspec-discover #-}\n"
+      & contents ?~ "{-# OPTIONS_GHC -F -pgmF hspec-discover #-}\n"
     file "SpecHelper.hs"
   file "LICENSE"
   file "Guardfile"
