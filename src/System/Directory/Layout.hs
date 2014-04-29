@@ -14,16 +14,22 @@ module System.Directory.Layout
   , emptydir
     -- ** Augment nodes
   , contents
-  , Contents
+  , Contents(..)
   , binary
   , text
   , copyOf
-  , anything
   , source
   , exists
+  , User(..)
   , user
+  , uid
+  , username
+  , Group(..)
   , group
+  , gid
+  , groupname
   , mode
+  , anything
   , into
   , focus
   , module System.Directory.Layout.Interpreter

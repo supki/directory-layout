@@ -140,16 +140,34 @@ spec = do
         writeFile (p </> "foo") ""
         r <- fit p $ do
           file "foo"
-            & user ?~ 0
-        r `shouldBe` errors [FitBadOwnerUserID (p </> "foo") 0 1000]
+            & user ?~ uid 0
+        r `shouldBe` errors [FitBadOwnerUser (p </> "foo") (uid 0) (uid 1000)]
+
+    it "tests file owner user name" $ do
+      temporary $ \p -> do
+        writeFile (p </> "foo") ""
+        n <- Posix.getEffectiveUserName
+        r <- fit p $ do
+          file "foo"
+            & user ?~ username "root"
+        r `shouldBe` errors [FitBadOwnerUser (p </> "foo") (username "root") (username n)]
 
     it "tests file owner group id" $ do
       temporary $ \p -> do
         writeFile (p </> "foo") ""
         r <- fit p $ do
           file "foo"
-            & group ?~ 0
-        r `shouldBe` errors [FitBadOwnerGroupID (p </> "foo") 0 1000]
+            & group ?~ gid 0
+        r `shouldBe` errors [FitBadOwnerGroup (p </> "foo") (gid 0) (gid 1000)]
+
+    it "tests file owner group id" $ do
+      temporary $ \p -> do
+        writeFile (p </> "foo") ""
+        n <- Posix.getEffectiveUserName
+        r <- fit p $ do
+          file "foo"
+            & group ?~ groupname "root"
+        r `shouldBe` errors [FitBadOwnerGroup (p </> "foo") (groupname "root") (groupname n)]
 
     it "tests file permissions" $ do
       temporary $ \p -> do
@@ -247,14 +265,29 @@ spec = do
         r <- make p $
           file "qux"
             & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
-            & user ?~ 0
+            & user ?~ uid 0
+        r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
+
+    it "changes the user name of the file owner" $ do
+      temporary $ \p -> do
+        r <- make p $
+          file "qux"
+            & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
+            & user ?~ username "root"
         r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
 
     it "changes the user id of the directory owner" $ do
       temporary $ \p -> do
         r <- make p $
           emptydir "boo"
-            & user ?~ 0
+            & user ?~ uid 0
+        r `shouldBe` errors [MakeIOException (p </> "boo") permissionErrorType]
+
+    it "changes the user name of the directory owner" $ do
+      temporary $ \p -> do
+        r <- make p $
+          emptydir "boo"
+            & user ?~ username "root"
         r `shouldBe` errors [MakeIOException (p </> "boo") permissionErrorType]
 
     it "changes the group id of the file owner" $ do
@@ -262,14 +295,29 @@ spec = do
         r <- make p $
           file "qux"
             & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
-            & group ?~ 0
+            & group ?~ gid 0
+        r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
+
+    it "changes the group name of the file owner" $ do
+      temporary $ \p -> do
+        r <- make p $
+          file "qux"
+            & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
+            & group ?~ groupname "root"
         r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
 
     it "changes the group id of the directory owner" $ do
       temporary $ \p -> do
         r <- make p $
           file "boo"
-            & group ?~ 0
+            & group ?~ gid 0
+        r `shouldBe` errors [MakeIOException (p </> "boo") permissionErrorType]
+
+    it "changes the group name of the directory owner" $ do
+      temporary $ \p -> do
+        r <- make p $
+          file "boo"
+            & group ?~ groupname "root"
         r `shouldBe` errors [MakeIOException (p </> "boo") permissionErrorType]
 
     it "changes the file permissions" $ do

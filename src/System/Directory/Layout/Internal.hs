@@ -59,8 +59,24 @@ instance IsList Contents where
 #endif
 
 -- | Auxiliary data
-data Aux = Aux (Maybe Posix.UserID) (Maybe Posix.GroupID) (Maybe Posix.FileMode)
+data Aux = Aux (Maybe User) (Maybe Group) (Maybe Posix.FileMode)
     deriving (Show, Eq, Typeable, Generic)
+
+data User =
+    UserID Posix.UserID
+  | Username String
+    deriving (Show, Eq, Typeable, Generic)
+
+instance IsString User where
+  fromString = Username
+
+data Group =
+    GroupID Posix.GroupID
+  | Groupname String
+    deriving (Show, Eq, Typeable, Generic)
+
+instance IsString Group where
+  fromString = Groupname
 
 -- | Equality check does not care about the order the files are listed insofar
 -- they are consistent, i.e. different things aren't named the same
@@ -132,25 +148,26 @@ contents _ l = pure l
 
 -- | Binary contents
 --
--- >>> let layout = file "foo" & contents .~ binary (ByteString.pack [1..10])
+-- >>> let layout = file "foo" & contents ?~ binary (ByteString.pack [1..10])
 binary :: ByteString -> Contents
 binary = Binary
 
 -- | Plain text contents
 --
--- >>> let layout = file "foo" & contents .~ text (Data.Text.pack "hello")
+-- >>> let layout = file "foo" & contents ?~ text (Data.Text.pack "hello")
 text :: Text -> Contents
 text = Text
 
 -- | Contents are the copy of whose of the real file
 --
--- >>> let layout = file "foo" & contents .~ copyOf "/home/user/.vimrc"
+-- >>> let layout = file "foo" & contents ?~ copyOf "/home/user/.vimrc"
 copyOf :: FilePath -> Contents
 copyOf = CopyOf
 
 -- | Anything
 --
 -- >>> let layout = file "foo" & contents .~ anything
+-- >>> let layout = file "foo" & user .~ anything
 anything :: Maybe a
 anything = Nothing
 
@@ -181,15 +198,35 @@ aux _ l = pure l
 
 -- | An optic into file owner
 --
--- >>> let layout = file "foo" & user ?~ 0
-user :: Traversal' (Layout a) (Maybe Posix.UserID)
+-- >>> let layout = file "foo" & user ?~ uid 0
+user :: Traversal' (Layout a) (Maybe User)
 user = aux . \f (Aux x y z) -> f x <&> \x' -> Aux x' y z
+
+-- | Set the file owner by uid
+uid :: Posix.UserID -> User
+uid = UserID
+
+-- | Set the file owner by username
+--
+-- >>> let layout = file "foo" & user ?~ username "root"
+username :: String -> User
+username = Username
 
 -- | An optic into file group
 --
--- >>> let layout = file "foo" & group ?~ 0
-group :: Traversal' (Layout a) (Maybe Posix.GroupID)
+-- >>> let layout = file "foo" & group ?~ gid 0
+group :: Traversal' (Layout a) (Maybe Group)
 group = aux . \f (Aux x y z) -> f y <&> \y' -> Aux x y' z
+
+-- | Set the file group by groupname
+gid :: Posix.GroupID -> Group
+gid = GroupID
+
+-- | Set the file group by groupname
+--
+-- >>> let layout = file "foo" & group ?~ groupname "wheel"
+groupname :: String -> Group
+groupname = Groupname
 
 -- | An optic into file mode
 --

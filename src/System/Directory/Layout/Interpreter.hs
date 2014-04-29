@@ -3,6 +3,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ViewPatterns #-}
 -- | 'Layout' interpreters
@@ -148,12 +149,24 @@ fitIO root = go where
 fitIOAux :: Aux -> FilePath -> IO ()
 fitIOAux (Aux muid mgid mperm) path = do
   status <- Posix.getSymbolicLinkStatus path
-  for_ muid $ \uid ->
-    unless (Posix.fileOwner status == uid) $
-      throwIO (FitBadOwnerUserID path uid (Posix.fileOwner status))
-  for_ mgid $ \gid ->
-    unless (Posix.fileGroup status == gid) $
-      throwIO (FitBadOwnerGroupID path gid (Posix.fileGroup status))
+  for_ muid $ \case
+    UserID i ->
+      unless (Posix.fileOwner status == i) $
+        throwIO (FitBadOwnerUser path (UserID i) (UserID (Posix.fileOwner status)))
+    Username name -> do
+      i <- getUserID name
+      n <- getUsername (Posix.fileOwner status)
+      unless (Posix.fileOwner status == i) $
+        throwIO (FitBadOwnerUser path (Username name) (Username n))
+  for_ mgid $ \case
+    GroupID i ->
+      unless (Posix.fileGroup status == i) $
+        throwIO (FitBadOwnerGroup path (GroupID i) (GroupID (Posix.fileGroup status)))
+    Groupname name -> do
+      i <- getGroupID name
+      n <- getGroupname (Posix.fileGroup status)
+      unless (Posix.fileGroup status == i) $
+        throwIO (FitBadOwnerGroup path (Groupname name) (Groupname n))
   for_ mperm $ \perm ->
     unless (Posix.fileMode status == perm) $
       throwIO (FitBadFileMode path perm (Posix.fileMode status))
@@ -161,8 +174,8 @@ fitIOAux (Aux muid mgid mperm) path = do
 data FitError =
     FitBadFileContents FilePath Contents {- expected -} Contents {- actual -}
   | FitBadLinkSource FilePath String {- expected -} String {- actual -}
-  | FitBadOwnerUserID FilePath Posix.UserID {- expected -} Posix.UserID {- actual -}
-  | FitBadOwnerGroupID FilePath Posix.GroupID {- expected -} Posix.GroupID {- actual -}
+  | FitBadOwnerUser FilePath User {- expected -} User {- actual -}
+  | FitBadOwnerGroup FilePath Group {- expected -} Group {- actual -}
   | FitBadFileMode FilePath Posix.FileMode {- expected -} Posix.FileMode {- actual -}
   | FitIOException FilePath IOErrorType
     deriving (Eq, Typeable, Generic)
@@ -187,14 +200,14 @@ instance Show FitError where
     , "actual:"
     , printf "  ‘%s’" actual
     ]
-  show (FitBadOwnerUserID path expected actual) = unlines $
+  show (FitBadOwnerUser path expected actual) = unlines $
     [ printf "Bad owner user id at ‘%s’" path
     , "expected:"
     , printf "  %s" (show expected)
     , "actual:"
     , printf "  %s" (show actual)
     ]
-  show (FitBadOwnerGroupID path expected actual) = unlines $
+  show (FitBadOwnerGroup path expected actual) = unlines $
     [ printf "Bad owner group id at ‘%s’" path
     , "expected:"
     , printf "  %s" (show expected)
@@ -241,10 +254,18 @@ makeIO root = go where
 
 makeIOAux :: Aux -> FilePath -> IO ()
 makeIOAux (Aux muid mgid mperm) path = do
-  for_ muid $ \uid ->
-    Posix.setOwnerAndGroup path uid (-1)
-  for_ mgid $
-    Posix.setOwnerAndGroup path (-1)
+  for_ muid $ \case
+    UserID i ->
+      Posix.setOwnerAndGroup path i (-1)
+    Username name -> do
+      i <- getUserID name
+      Posix.setOwnerAndGroup path i (-1)
+  for_ mgid $ \case
+    GroupID i ->
+      Posix.setOwnerAndGroup path (-1) i
+    Groupname name -> do
+      i <- getGroupID name
+      Posix.setOwnerAndGroup path (-1) i
   for_ mperm $
     Posix.setFileMode path
 
@@ -258,6 +279,18 @@ instance Exception MakeError where
     | Just ioe <- fromException e' =
         Just (MakeIOException (fromMaybe (ioeGetLocation ioe) (ioeGetFileName ioe)) (ioeGetErrorType ioe))
     | otherwise = cast e
+
+getUserID :: String -> IO Posix.UserID
+getUserID = fmap Posix.userID . Posix.getUserEntryForName
+
+getUsername :: Posix.UserID -> IO String
+getUsername = fmap Posix.userName . Posix.getUserEntryForID
+
+getGroupID :: String -> IO Posix.GroupID
+getGroupID = fmap Posix.groupID . Posix.getGroupEntryForName
+
+getGroupname :: Posix.GroupID -> IO String
+getGroupname = fmap Posix.groupName . Posix.getGroupEntryForID
 
 data Validation e a = Error e | Result a
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable, Typeable, Data, Generic)
