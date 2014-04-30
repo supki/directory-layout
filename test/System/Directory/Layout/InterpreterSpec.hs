@@ -172,6 +172,7 @@ spec = do
     it "tests file permissions" $ do
       temporary $ \p -> do
         writeFile (p </> "foo") ""
+        Posix.setFileMode (p </> "foo") 0o100644
         r <- fit p $ do
           file "foo"
             & mode ?~ 0o100777

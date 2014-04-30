@@ -1,0 +1,8 @@
+language: haskell
+
+before_install:
+    - cabal install c2hs
+
+script:
+    - cabal configure --enable-tests && cabal build && cabal test
+    - cabal sdist
