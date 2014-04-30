@@ -281,6 +281,13 @@ spec = do
             & user ?~ uid 0
         r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
 
+    it "changes the user id of the symbolic link owner" $ do
+      temporary $ \p -> do
+        r <- make p $
+          symlink "foo" "bar"
+            & user ?~ uid 0
+        r `shouldBe` errors [MakeIOException (p </> "foo") permissionErrorType]
+
     it "changes the user name of the file owner" $ do
       temporary $ \p -> do
         r <- make p $
@@ -288,6 +295,13 @@ spec = do
             & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
             & user ?~ username "root"
         r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
+
+    it "changes the user name of the symbolic link owner" $ do
+      temporary $ \p -> do
+        r <- make p $
+          symlink "foo" "bar"
+            & user ?~ username "root"
+        r `shouldBe` errors [MakeIOException (p </> "foo") permissionErrorType]
 
     it "changes the user id of the directory owner" $ do
       temporary $ \p -> do
@@ -318,6 +332,20 @@ spec = do
             & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
             & group ?~ groupname "root"
         r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
+
+    it "changes the group id of the symbolic link owner" $ do
+      temporary $ \p -> do
+        r <- make p $
+          symlink "foo" "bar"
+            & group ?~ gid 0
+        r `shouldBe` errors [MakeIOException (p </> "foo") permissionErrorType]
+
+    it "changes the group name of the symbolic link owner" $ do
+      temporary $ \p -> do
+        r <- make p $
+          symlink "foo" "bar"
+            & group ?~ groupname "root"
+        r `shouldBe` errors [MakeIOException (p </> "foo") permissionErrorType]
 
     it "changes the group id of the directory owner" $ do
       temporary $ \p -> do

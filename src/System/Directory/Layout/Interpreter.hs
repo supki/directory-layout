@@ -256,16 +256,16 @@ makeIOAux :: Aux -> FilePath -> IO ()
 makeIOAux (Aux muid mgid mperm) path = do
   for_ muid $ \case
     UserID i ->
-      Posix.setOwnerAndGroup path i (-1)
+      Posix.setSymbolicLinkOwnerAndGroup path i (-1)
     Username name -> do
       i <- getUserID name
-      Posix.setOwnerAndGroup path i (-1)
+      Posix.setSymbolicLinkOwnerAndGroup path i (-1)
   for_ mgid $ \case
     GroupID i ->
-      Posix.setOwnerAndGroup path (-1) i
+      Posix.setSymbolicLinkOwnerAndGroup path (-1) i
     Groupname name -> do
       i <- getGroupID name
-      Posix.setOwnerAndGroup path (-1) i
+      Posix.setSymbolicLinkOwnerAndGroup path (-1) i
   for_ mperm $
     Posix.setFileMode path
 
