@@ -26,6 +26,7 @@ library
     , hspec
     , lens >= 4
     , semigroups
+    , template-haskell
     , text
     , transformers
     , unix
@@ -34,6 +35,7 @@ library
     System.Directory.Layout
     System.Directory.Layout.Internal
     System.Directory.Layout.Interpreter
+    System.Directory.Layout.QQ
   hs-source-dirs:
     src
   ghc-options:
@@ -69,6 +71,7 @@ test-suite spec
     , hspec
     , lens >= 4
     , semigroups
+    , template-haskell
     , text
     , transformers
     , unix

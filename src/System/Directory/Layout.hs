@@ -33,7 +33,9 @@ module System.Directory.Layout
   , into
   , focus
   , module System.Directory.Layout.Interpreter
+  , module System.Directory.Layout.QQ
   ) where
 
 import System.Directory.Layout.Internal
 import System.Directory.Layout.Interpreter
+import System.Directory.Layout.QQ

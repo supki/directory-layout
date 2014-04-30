@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 module System.Directory.LayoutSpec
   ( spec
   ) where
@@ -30,7 +31,9 @@ project = do
         file "InterpreterSpec.hs"
       file "LayoutSpec.hs"
     file "Spec.hs"
-      & contents ?~ "{-# OPTIONS_GHC -F -pgmF hspec-discover #-}\n"
+      & contents ?~ [dedent|
+        {-# OPTIONS_GHC -F -pgmF hspec-discover #-}
+        |]
     file "SpecHelper.hs"
   file "LICENSE"
   file "Guardfile"

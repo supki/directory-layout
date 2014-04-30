@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes #-}
 module System.Directory.Layout.InterpreterSpec
   ( spec
   ) where
@@ -52,6 +53,17 @@ spec = do
           file "foo"
             & contents ?~ text "bar"
         r `shouldBe` errors [FitBadFileContents (p </> "foo") (text "bar") (text "foo")]
+
+    it "tests text file contents specified with the quasiquoter" $ do
+      temporary $ \p -> do
+        writeFile (p </> "foo") "foo"
+        r <- fit p $ do
+          file "foo"
+            & contents ?~ [dedent|
+                foo
+                bar
+                |]
+        r `shouldBe` errors [FitBadFileContents (p </> "foo") (text "foo\nbar\n") (text "foo")]
 
     it "tests binary file existence" $ do
       temporary $ \p -> do
