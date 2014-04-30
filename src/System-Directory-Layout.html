@@ -7,79 +7,46 @@
 <link type='text/css' rel='stylesheet' href='hscolour.css' />
 </head>
 <body>
-<pre><a name="line-1"></a><span class='hs-comment'>-- | Language to express directory layouts</span>
-<a name="line-2"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span>
-<a name="line-3"></a>  <span class='hs-layout'>(</span> <span class='hs-comment'>-- * Layout declaration</span>
-<a name="line-4"></a>    <span class='hs-conid'>Node</span><span class='hs-layout'>,</span> <span class='hs-conid'>Layout</span><span class='hs-layout'>,</span> <span class='hs-varid'>file</span><span class='hs-layout'>,</span> <span class='hs-varid'>file_</span><span class='hs-layout'>,</span> <span class='hs-varid'>directory</span><span class='hs-layout'>,</span> <span class='hs-varid'>directory_</span>
-<a name="line-5"></a>    <span class='hs-comment'>-- * Layout construction</span>
-<a name="line-6"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>fromDirectory</span>
-<a name="line-7"></a>    <span class='hs-comment'>-- * Layout traverses</span>
-<a name="line-8"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>make</span><span class='hs-layout'>,</span> <span class='hs-varid'>check</span>
-<a name="line-9"></a>    <span class='hs-comment'>-- * Errors</span>
-<a name="line-10"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>LayoutException</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
-<a name="line-11"></a>  <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-12"></a>
-<a name="line-13"></a><span class='hs-keyword'>import</span>           <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Lens</span>
-<a name="line-14"></a><span class='hs-keyword'>import</span>           <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Monad</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&gt;=&gt;</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-15"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>Control</span><span class='hs-varop'>.</span><span class='hs-conid'>Exception</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>E</span>
-<a name="line-16"></a><span class='hs-keyword'>import</span>           <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Default</span> <span class='hs-layout'>(</span><span class='hs-varid'>def</span><span class='hs-layout'>)</span>
-<a name="line-17"></a><span class='hs-keyword'>import</span>           <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Monoid</span> <span class='hs-layout'>(</span><span class='hs-varid'>mconcat</span><span class='hs-layout'>)</span>
-<a name="line-18"></a><span class='hs-keyword'>import</span>           <span class='hs-conid'>Data</span><span class='hs-varop'>.</span><span class='hs-conid'>Text</span> <span class='hs-layout'>(</span><span class='hs-conid'>Text</span><span class='hs-layout'>)</span>
-<a name="line-19"></a><span class='hs-keyword'>import</span> <span class='hs-keyword'>qualified</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span> <span class='hs-keyword'>as</span> <span class='hs-conid'>D</span>
-<a name="line-20"></a><span class='hs-keyword'>import</span>           <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>FilePath</span> <span class='hs-layout'>(</span><span class='hs-varid'>combine</span><span class='hs-layout'>)</span>
-<a name="line-21"></a><span class='hs-keyword'>import</span>           <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>FilePath</span><span class='hs-varop'>.</span><span class='hs-conid'>Lens</span> <span class='hs-layout'>(</span><span class='hs-varid'>filename</span><span class='hs-layout'>)</span>
-<a name="line-22"></a>
-<a name="line-23"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Internal</span> <span class='hs-layout'>(</span><span class='hs-conid'>Node</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-conid'>Layout</span><span class='hs-layout'>)</span>
-<a name="line-24"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Traverse</span> <span class='hs-layout'>(</span><span class='hs-varid'>make</span><span class='hs-layout'>,</span> <span class='hs-varid'>check</span><span class='hs-layout'>)</span>
-<a name="line-25"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Errored</span> <span class='hs-layout'>(</span><span class='hs-conid'>LayoutException</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-26"></a>
-<a name="line-27"></a>
-<a name="line-28"></a><a name="file"></a><span class='hs-comment'>-- | Declare file with specified contents</span>
-<a name="line-29"></a><span class='hs-definition'>file</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Text</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Layout</span>
-<a name="line-30"></a><span class='hs-definition'>file</span> <span class='hs-varid'>x</span> <span class='hs-varid'>t</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>F</span> <span class='hs-varid'>x</span> <span class='hs-layout'>(</span><span class='hs-conid'>T</span> <span class='hs-varid'>t</span> <span class='hs-conid'>()</span><span class='hs-layout'>)</span> <span class='hs-varid'>def</span>
-<a name="line-31"></a><span class='hs-comment'>{-# INLINE file #-}</span>
-<a name="line-32"></a>
-<a name="line-33"></a>
-<a name="line-34"></a><a name="file_"></a><span class='hs-comment'>-- | Declare empty file</span>
-<a name="line-35"></a><span class='hs-definition'>file_</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Layout</span>
-<a name="line-36"></a><span class='hs-definition'>file_</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>F</span> <span class='hs-varid'>x</span> <span class='hs-varid'>def</span> <span class='hs-varid'>def</span>
-<a name="line-37"></a><span class='hs-comment'>{-# INLINE file_ #-}</span>
+<pre><a name="line-1"></a><span class='hs-comment'>{-# LANGUAGE DeriveDataTypeable #-}</span>
+<a name="line-2"></a><span class='hs-comment'>{-# LANGUAGE DeriveGeneric #-}</span>
+<a name="line-3"></a><span class='hs-comment'>{-# LANGUAGE Rank2Types #-}</span>
+<a name="line-4"></a><span class='hs-comment'>{-# LANGUAGE TypeOperators #-}</span>
+<a name="line-5"></a><span class='hs-comment'>{-# LANGUAGE ViewPatterns #-}</span>
+<a name="line-6"></a><span class='hs-comment'>-- | Directory layout DSL</span>
+<a name="line-7"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span>
+<a name="line-8"></a>  <span class='hs-layout'>(</span> <span class='hs-comment'>-- * Layout description</span>
+<a name="line-9"></a>    <span class='hs-conid'>Layout</span>
+<a name="line-10"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>file</span>
+<a name="line-11"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>symlink</span>
+<a name="line-12"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>dir</span>
+<a name="line-13"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>dirs</span>
+<a name="line-14"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>emptydir</span>
+<a name="line-15"></a>    <span class='hs-comment'>-- ** Augment nodes</span>
+<a name="line-16"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>contents</span>
+<a name="line-17"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>Contents</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
+<a name="line-18"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>binary</span>
+<a name="line-19"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>text</span>
+<a name="line-20"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>copyOf</span>
+<a name="line-21"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>source</span>
+<a name="line-22"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>exists</span>
+<a name="line-23"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>User</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
+<a name="line-24"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>user</span>
+<a name="line-25"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>uid</span>
+<a name="line-26"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>username</span>
+<a name="line-27"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>Group</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
+<a name="line-28"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>group</span>
+<a name="line-29"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>gid</span>
+<a name="line-30"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>groupname</span>
+<a name="line-31"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>mode</span>
+<a name="line-32"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>anything</span>
+<a name="line-33"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>into</span>
+<a name="line-34"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>focus</span>
+<a name="line-35"></a>  <span class='hs-layout'>,</span> <span class='hs-keyword'>module</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Interpreter</span>
+<a name="line-36"></a>  <span class='hs-layout'>,</span> <span class='hs-keyword'>module</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>QQ</span>
+<a name="line-37"></a>  <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
 <a name="line-38"></a>
-<a name="line-39"></a>
-<a name="line-40"></a><a name="directory"></a><span class='hs-comment'>-- | Declare directory with specified listing</span>
-<a name="line-41"></a><span class='hs-definition'>directory</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Layout</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Layout</span>
-<a name="line-42"></a><span class='hs-definition'>directory</span> <span class='hs-varid'>x</span> <span class='hs-varid'>d</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>D</span> <span class='hs-varid'>x</span> <span class='hs-varid'>d</span> <span class='hs-varid'>def</span>
-<a name="line-43"></a><span class='hs-comment'>{-# INLINE directory #-}</span>
-<a name="line-44"></a>
-<a name="line-45"></a>
-<a name="line-46"></a><a name="directory_"></a><span class='hs-comment'>-- | Declare empty directory</span>
-<a name="line-47"></a><span class='hs-definition'>directory_</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>Layout</span>
-<a name="line-48"></a><span class='hs-definition'>directory_</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>D</span> <span class='hs-varid'>x</span> <span class='hs-varid'>def</span> <span class='hs-varid'>def</span>
-<a name="line-49"></a><span class='hs-comment'>{-# INLINE directory_ #-}</span>
-<a name="line-50"></a>
-<a name="line-51"></a>
-<a name="line-52"></a><a name="fromDirectory"></a><span class='hs-comment'>-- | Create layout from directory</span>
-<a name="line-53"></a><span class='hs-comment'>--</span>
-<a name="line-54"></a><span class='hs-comment'>-- Canonicalizes path before traversing, generally understands only</span>
-<a name="line-55"></a><span class='hs-comment'>-- regular files and directories and ignores anything else it could not understand</span>
-<a name="line-56"></a><span class='hs-definition'>fromDirectory</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-layout'>(</span><span class='hs-conid'>Either</span> <span class='hs-conid'>E</span><span class='hs-varop'>.</span><span class='hs-conid'>IOException</span> <span class='hs-conid'>Layout</span><span class='hs-layout'>)</span>
-<a name="line-57"></a><span class='hs-definition'>fromDirectory</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>E</span><span class='hs-varop'>.</span><span class='hs-varid'>try</span> <span class='hs-varop'>.</span> <span class='hs-layout'>(</span><span class='hs-conid'>D</span><span class='hs-varop'>.</span><span class='hs-varid'>canonicalizePath</span> <span class='hs-varop'>&gt;=&gt;</span> <span class='hs-varid'>traverseDirectory</span><span class='hs-layout'>)</span>
-<a name="line-58"></a> <span class='hs-keyword'>where</span>
-<a name="line-59"></a>  <span class='hs-varid'>traverseDirectory</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Layout</span>
-<a name="line-60"></a>  <span class='hs-varid'>traverseDirectory</span> <span class='hs-varid'>path</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>getDirectoryContents</span> <span class='hs-varid'>path</span> <span class='hs-varop'>&gt;&gt;=</span>
-<a name="line-61"></a>    <span class='hs-varid'>traverse</span> <span class='hs-layout'>(</span><span class='hs-varid'>traverseFilePath</span> <span class='hs-varop'>.</span> <span class='hs-varid'>combine</span> <span class='hs-varid'>path</span><span class='hs-layout'>)</span> <span class='hs-varop'>&lt;&amp;&gt;</span> <span class='hs-varid'>directory</span> <span class='hs-layout'>(</span><span class='hs-varid'>path</span><span class='hs-varop'>^.</span><span class='hs-varid'>filename</span><span class='hs-layout'>)</span> <span class='hs-varop'>.</span> <span class='hs-varid'>mconcat</span>
-<a name="line-62"></a>
-<a name="line-63"></a>  <span class='hs-varid'>traverseFilePath</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-conid'>Layout</span>
-<a name="line-64"></a>  <span class='hs-varid'>traverseFilePath</span> <span class='hs-varid'>path</span> <span class='hs-keyglyph'>=</span> <span class='hs-keyword'>do</span>
-<a name="line-65"></a>    <span class='hs-varid'>isFile</span>      <span class='hs-keyglyph'>&lt;-</span> <span class='hs-conid'>D</span><span class='hs-varop'>.</span><span class='hs-varid'>doesFileExist</span> <span class='hs-varid'>path</span>
-<a name="line-66"></a>    <span class='hs-varid'>isDirectory</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-conid'>D</span><span class='hs-varop'>.</span><span class='hs-varid'>doesDirectoryExist</span> <span class='hs-varid'>path</span>
-<a name="line-67"></a>    <span class='hs-keyword'>case</span> <span class='hs-layout'>(</span><span class='hs-varid'>isFile</span><span class='hs-layout'>,</span> <span class='hs-varid'>isDirectory</span><span class='hs-layout'>)</span> <span class='hs-keyword'>of</span>
-<a name="line-68"></a>      <span class='hs-layout'>(</span><span class='hs-conid'>True</span><span class='hs-layout'>,</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-varid'>file_</span> <span class='hs-layout'>(</span><span class='hs-varid'>path</span><span class='hs-varop'>^.</span><span class='hs-varid'>filename</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
-<a name="line-69"></a>      <span class='hs-layout'>(</span><span class='hs-keyword'>_</span><span class='hs-layout'>,</span> <span class='hs-conid'>True</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>traverseDirectory</span> <span class='hs-varid'>path</span>
-<a name="line-70"></a>      <span class='hs-comment'>-- Should be pretty rare in practice: broken symlinks and stuff</span>
-<a name="line-71"></a>      <span class='hs-layout'>(</span><span class='hs-keyword'>_</span><span class='hs-layout'>,</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>    <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>return</span> <span class='hs-varid'>def</span>
-<a name="line-72"></a>
-<a name="line-73"></a>  <span class='hs-varid'>getDirectoryContents</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>FilePath</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>IO</span> <span class='hs-keyglyph'>[</span><span class='hs-conid'>FilePath</span><span class='hs-keyglyph'>]</span>
-<a name="line-74"></a>  <span class='hs-varid'>getDirectoryContents</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>fmap</span> <span class='hs-layout'>(</span><span class='hs-varid'>filter</span> <span class='hs-layout'>(</span><span class='hs-varid'>not</span> <span class='hs-varop'>.</span> <span class='hs-layout'>(</span><span class='hs-varop'>`elem`</span> <span class='hs-keyglyph'>[</span><span class='hs-str'>"."</span><span class='hs-layout'>,</span> <span class='hs-str'>".."</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varop'>.</span> <span class='hs-conid'>D</span><span class='hs-varop'>.</span><span class='hs-varid'>getDirectoryContents</span>
+<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Internal</span>
+<a name="line-40"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Interpreter</span>
+<a name="line-41"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>QQ</span>
 </pre></body>
 </html>
