@@ -3,11 +3,12 @@
 module System.Directory.Layout.Errored
   ( LayoutException(..)
   , createDirectory, createFile, createLink
-  , fileExists, directoryExists, readFile, checkSource
+  , fileExists, symlinkExists, directoryExists, readFile, checkSource
   , anyfail
   , relative
   ) where
 
+import           Control.Applicative
 import           Control.Exception
 import           Control.Monad (when, unless)
 import           Data.Maybe (fromMaybe)
@@ -22,6 +23,7 @@ import           Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified System.Directory as D
+import qualified System.Posix.Files as U
 import           System.FilePath (makeRelative)
 
 
@@ -44,6 +46,7 @@ data LayoutException =
   | CS IOErrorType FilePath String -- ^ 'checkSource' eceptions
   | CF IOErrorType FilePath        -- ^ 'createFile' eceptions
   | FE IOErrorType FilePath        -- ^ 'fileExists' eceptions
+  | SE IOErrorType FilePath        -- ^ 'symlinkExists' eceptions
   | DE IOErrorType FilePath        -- ^ 'directoryExists' eceptions
   | RF IOErrorType FilePath Text   -- ^ 'readFile' eceptions
     deriving (Show, Eq)
@@ -83,6 +86,13 @@ fileExists fp = io $ do
   return . unless p $
     Left (FE doesNotExistErrorType fp)
 
+-- | 'D.doesFileExist' that returns 'Either' instead of 'Bool'
+symlinkExists :: MonadIO m => FilePath -> m (Either LayoutException ())
+symlinkExists fp = io $ do
+  p <- U.isSymbolicLink <$> U.getSymbolicLinkStatus fp
+  return . unless p $
+    Left (SE doesNotExistErrorType fp)
+
 -- | 'D.doesDirectoryExist' that returns 'Either' instead of 'Bool'
 directoryExists :: MonadIO m => FilePath -> m (Either LayoutException ())
 directoryExists fp = io $ do
@@ -114,5 +124,6 @@ relative r (CD t fp)   = CD t (makeRelative r fp)
 relative r (CS t fp s) = CS t (makeRelative r fp) s
 relative r (CF t fp)   = CF t (makeRelative r fp)
 relative r (FE t fp)   = FE t (makeRelative r fp)
+relative r (SE t fp)   = SE t (makeRelative r fp)
 relative r (DE t fp)   = DE t (makeRelative r fp)
 relative r (RF t fp c) = RF t (makeRelative r fp) c

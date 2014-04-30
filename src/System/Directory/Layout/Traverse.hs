@@ -134,7 +134,7 @@ checkFile p t = ask >>= \d -> anyfail $ case t of
 
 checkLink :: FilePath -> String -> RunT ()
 checkLink p s = ask >>= \d -> do
-  anyfail $ fileExists (d </> p)
+  anyfail $ symlinkExists (d </> p)
   anyfail $ checkSource (d </> p) s
 
 checkDirectory :: FilePath -> RunT ()
