@@ -13,6 +13,7 @@ module System.Directory.Layout.Interpreter
   , Validation(..)
   , fit
   , FitError(..)
+  , FitContentsError(..)
   , make
   , MakeError(..)
   ) where
@@ -24,6 +25,7 @@ import           Control.Monad.Free
 import           Data.Bifoldable (Bifoldable(..))
 import           Data.Bifunctor (Bifunctor(..))
 import           Data.Bitraversable (Bitraversable(..))
+import           Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as ByteStringLazy
 import           Data.Data (Data, Typeable)
@@ -32,6 +34,7 @@ import           Data.Functor.Compose (Compose(..))
 import           Data.List.NonEmpty (NonEmpty)
 import           Data.Maybe (fromMaybe)
 import           Data.Semigroup (Semigroup(..))
+import           Data.Text (Text)
 import qualified Data.Text.IO as Text
 import           Data.Traversable (Traversable)
 import           Data.Typeable (cast)
@@ -124,16 +127,16 @@ fitIO root = go where
       Binary bs -> do
         real <- ByteString.readFile fullpath
         when (real /= bs) $
-          throwIO (FitBadFileContents fullpath cs' (binary real))
+          throwIO (FitBadFileContents fullpath (FitBadBinary bs real))
       Text t -> do
         real <- Text.readFile fullpath
         when (real /= t) $
-          throwIO (FitBadFileContents fullpath cs' (text real))
-      CopyOf realfile -> do
-        real <- ByteStringLazy.readFile realfile
+          throwIO (FitBadFileContents fullpath (FitBadText t real))
+      CopyOf f -> do
+        origin <- ByteStringLazy.readFile f
         copy <- ByteStringLazy.readFile fullpath
-        when (real /= copy) $
-          throwIO (FitBadFileContents fullpath cs' (copyOf fullpath))
+        when (origin /= copy) $
+          throwIO (FitBadFileContents fullpath (FitBadCopyOf f))
     fitIOAux a fullpath
   go (SL (combine root -> fullpath) s e a _) = do
     path <- Posix.readSymbolicLink fullpath
@@ -172,7 +175,7 @@ fitIOAux (Aux muid mgid mperm) path = do
       throwIO (FitBadFileMode path perm (Posix.fileMode status))
 
 data FitError =
-    FitBadFileContents FilePath Contents {- expected -} Contents {- actual -}
+    FitBadFileContents FilePath FitContentsError
   | FitBadLinkSource FilePath String {- expected -} String {- actual -}
   | FitBadOwnerUser FilePath User {- expected -} User {- actual -}
   | FitBadOwnerGroup FilePath Group {- expected -} Group {- actual -}
@@ -180,19 +183,35 @@ data FitError =
   | FitIOException FilePath IOErrorType
     deriving (Eq, Typeable, Generic)
 
+data FitContentsError =
+    FitBadBinary ByteString ByteString
+  | FitBadText Text Text
+  | FitBadCopyOf FilePath
+    deriving (Eq, Typeable, Generic)
+
 instance Show FitError where
-  show (FitBadFileContents path expected actual) = unlines $
-    [ printf "Bad contents at ‘%s’" path
-    , "expected:"
-    , printf "  %s" (showC expected)
-    , "actual:"
-    , printf "  %s" (showC actual)
-    ]
+  show (FitBadFileContents path mismatch) = unlines $
+    printf "Bad contents at ‘%s’" path : showCE mismatch
    where
-    showC :: Contents -> String
-    showC (Binary bs) = printf "%s" (show (ByteString.unpack bs))
-    showC (Text t) = printf "%s" (show t)
-    showC (CopyOf p) = printf "a file at ‘%s’" p
+    showCE :: FitContentsError -> [String]
+    showCE (FitBadBinary expected actual) =
+      [ "expected:"
+      , printf "  %s" (show (ByteString.unpack expected))
+      , "actual:"
+      , printf "  %s" (show (ByteString.unpack actual))
+      ]
+    showCE (FitBadText expected actual) =
+      [ "expected:"
+      , printf "  %s" (show expected)
+      , "actual:"
+      , printf "  %s" (show actual)
+      ]
+    showCE (FitBadCopyOf f) =
+      [ "expected:"
+      , printf "  a copy of ‘%s’" f
+      , "actual:"
+      , "  something else"
+      ]
   show (FitBadLinkSource path expected actual) = unlines $
     [ printf "Bad symlink source at ‘%s’" path
     , "expected:"

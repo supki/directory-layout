@@ -52,7 +52,10 @@ spec = do
         r <- fit p $ do
           file "foo"
             & contents ?~ text "bar"
-        r `shouldBe` errors [FitBadFileContents (p </> "foo") (text "bar") (text "foo")]
+        r `shouldBe` errors
+          [ FitBadFileContents (p </> "foo") $
+              FitBadText "bar" "foo"
+          ]
 
     it "tests text file contents specified with the quasiquoter" $ do
       temporary $ \p -> do
@@ -63,7 +66,10 @@ spec = do
                 foo
                 bar
                 |]
-        r `shouldBe` errors [FitBadFileContents (p </> "foo") (text "foo\nbar\n") (text "foo")]
+        r `shouldBe` errors
+          [ FitBadFileContents (p </> "foo") $
+              FitBadText "foo\nbar\n" "foo"
+          ]
 
     it "tests binary file existence" $ do
       temporary $ \p -> do
@@ -79,9 +85,8 @@ spec = do
           file "foo"
             & contents ?~ binary (ByteString.pack [1, 2, 3, 4])
         r `shouldBe` errors
-         [ FitBadFileContents (p </> "foo")
-             (binary (ByteString.pack [1, 2, 3, 4]))
-             (binary (ByteString.pack [5, 6, 7, 8]))
+         [ FitBadFileContents (p </> "foo") $
+             FitBadBinary (ByteString.pack [1, 2, 3, 4]) (ByteString.pack [5, 6, 7, 8])
          ]
 
     it "tests copy file contents" $ do
@@ -91,7 +96,10 @@ spec = do
         r <- fit p $ do
           file "foo"
             & contents ?~ copyOf (p </> "bar")
-        r `shouldBe` errors [FitBadFileContents (p </> "foo") (copyOf (p </> "bar")) (copyOf (p </> "foo"))]
+        r `shouldBe` errors
+          [ FitBadFileContents (p </> "foo") $
+              FitBadCopyOf (p </> "bar")
+          ]
 
     it "tests copy file contents" $ do
       temporary $ \p -> do
@@ -125,7 +133,8 @@ spec = do
           file "baz"
         r `shouldBe` errors
           [ FitIOException (p </> "foo") doesNotExistErrorType
-          , FitBadFileContents (p </> "bar") (text "quux") (text "qux")
+          , FitBadFileContents (p </> "bar") $
+              FitBadText "quux" "qux"
           , FitIOException (p </> "baz") doesNotExistErrorType
           ]
 
@@ -142,7 +151,8 @@ spec = do
             file "hoo"
         r `shouldBe` errors
           [ FitIOException (p </> "xyz" </> "xyzzy" </> "foo") doesNotExistErrorType
-          , FitBadFileContents (p </> "xyz" </> "xyzzy" </> "bar") (text "quux") (text "qux")
+          , FitBadFileContents (p </> "xyz" </> "xyzzy" </> "bar") $
+              FitBadText "quux" "qux"
           , FitIOException (p </> "boo") doesNotExistErrorType
           , FitIOException (p </> "boo" </> "hoo") doesNotExistErrorType
           ]
@@ -392,9 +402,9 @@ spec = do
                   & contents ?~ binary (ByteString.pack [98, 121, 101])
         _ <- make p l
         fit p l `shouldReturn` errors
-          [ FitBadFileContents (p </> "foo" </> "qux")
-              (binary (ByteString.pack [104, 101, 108, 108, 111]))
-              (binary (ByteString.pack [98, 121, 101]))
+          [ FitBadFileContents (p </> "foo" </> "qux") $ FitBadBinary
+              (ByteString.pack [104, 101, 108, 108, 111])
+              (ByteString.pack [98, 121, 101])
           ]
 
 tonel :: a -> Validation (NonEmpty a) b
