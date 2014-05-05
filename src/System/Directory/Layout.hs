@@ -5,18 +5,20 @@
 {-# LANGUAGE ViewPatterns #-}
 -- | Directory layout DSL
 module System.Directory.Layout
-  ( -- * Layout description
+  ( -- * Describe layouts
     Layout
+    -- ** Nodes
   , file
   , symlink
   , dir
   , dirs
   , emptydir
-    -- ** Augment nodes
+    -- ** Nodes augmentation
   , contents
   , Contents(..)
   , binary
   , text
+  , dedent
   , copyOf
   , source
   , exists
@@ -32,8 +34,8 @@ module System.Directory.Layout
   , anything
   , into
   , focus
+    -- * Run layouts
   , module System.Directory.Layout.Interpreter
-  , module System.Directory.Layout.QQ
   ) where
 
 import System.Directory.Layout.Internal

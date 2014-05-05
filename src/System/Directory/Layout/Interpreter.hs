@@ -6,7 +6,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ViewPatterns #-}
--- | 'Layout' interpreters
+-- | A bunch of 'Layout' description interpreters
 module System.Directory.Layout.Interpreter
   ( pretty
   , spec
@@ -174,6 +174,7 @@ fitIOAux (Aux muid mgid mperm) path = do
     unless (Posix.fileMode status == perm) $
       throwIO (FitBadFileMode path perm (Posix.fileMode status))
 
+-- | Errors encountered while running 'fit'
 data FitError =
     FitBadFileContents FilePath FitContentsError
   | FitBadLinkSource FilePath String {- expected -} String {- actual -}
@@ -183,6 +184,7 @@ data FitError =
   | FitIOException FilePath IOErrorType
     deriving (Eq, Typeable, Generic)
 
+-- | Expected/actual file contents mismatch
 data FitContentsError =
     FitBadBinary ByteString ByteString
   | FitBadText Text Text
@@ -288,6 +290,7 @@ makeIOAux (Aux muid mgid mperm) path = do
   for_ mperm $
     Posix.setFileMode path
 
+-- | Errors encountered while running 'make'
 data MakeError =
   MakeIOException FilePath IOErrorType
   deriving (Show, Eq, Typeable, Generic)
@@ -311,6 +314,7 @@ getGroupID = fmap Posix.groupID . Posix.getGroupEntryForName
 getGroupname :: Posix.GroupID -> IO String
 getGroupname = fmap Posix.groupName . Posix.getGroupEntryForID
 
+-- | This type is isomorphic to 'Either' but its 'Applicative' instance accumulates errors
 data Validation e a = Error e | Result a
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable, Typeable, Data, Generic)
 

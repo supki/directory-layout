@@ -1,4 +1,5 @@
 {-# LANGUAGE TemplateHaskell #-}
+-- | Convenience quasiquoter to ease the pain working with multiline strings
 module System.Directory.Layout.QQ (dedent) where
 
 import Data.Char (isSpace)

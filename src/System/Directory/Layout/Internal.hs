@@ -62,6 +62,7 @@ instance IsList Contents where
 data Aux = Aux (Maybe User) (Maybe Group) (Maybe Posix.FileMode)
     deriving (Show, Eq, Typeable, Generic)
 
+-- | File owner
 data User =
     UserID Posix.UserID
   | Username String
@@ -70,6 +71,7 @@ data User =
 instance IsString User where
   fromString = Username
 
+-- | File group
 data Group =
     GroupID Posix.GroupID
   | Groupname String
