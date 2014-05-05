@@ -1,7 +1,8 @@
 name:                directory-layout
 version:             0.6.0.0
 synopsis:            Directory layout DSL
--- description:         
+description:
+  Making, fitting, printing directory layouts
 license:             BSD3
 license-file:        LICENSE
 author:              Matvey Aksenov
