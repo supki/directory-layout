@@ -3,10 +3,15 @@
 
   * Complete rewrite
 
-0.5.0.0 (never released)
-========================
+  * Added `pretty` and `spec` interpreters
 
-  * simplify `make` interface: it always creates the layout in the current directory
+  * Layout nodes can be configured with user/group and file permissions
+
+  * Added symlinks with optionally checked source existence
+
+  * File contents can be specified as raw bytes or text data
+
+  * File can be declared the copy of another file
 
 0.4.0.0
 =======
