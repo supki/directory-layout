@@ -14,39 +14,41 @@
 <a name="line-5"></a><span class='hs-comment'>{-# LANGUAGE ViewPatterns #-}</span>
 <a name="line-6"></a><span class='hs-comment'>-- | Directory layout DSL</span>
 <a name="line-7"></a><span class='hs-keyword'>module</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span>
-<a name="line-8"></a>  <span class='hs-layout'>(</span> <span class='hs-comment'>-- * Layout description</span>
+<a name="line-8"></a>  <span class='hs-layout'>(</span> <span class='hs-comment'>-- * Describe layouts</span>
 <a name="line-9"></a>    <span class='hs-conid'>Layout</span>
-<a name="line-10"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>file</span>
-<a name="line-11"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>symlink</span>
-<a name="line-12"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>dir</span>
-<a name="line-13"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>dirs</span>
-<a name="line-14"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>emptydir</span>
-<a name="line-15"></a>    <span class='hs-comment'>-- ** Augment nodes</span>
-<a name="line-16"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>contents</span>
-<a name="line-17"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>Contents</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
-<a name="line-18"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>binary</span>
-<a name="line-19"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>text</span>
-<a name="line-20"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>copyOf</span>
-<a name="line-21"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>source</span>
-<a name="line-22"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>exists</span>
-<a name="line-23"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>User</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
-<a name="line-24"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>user</span>
-<a name="line-25"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>uid</span>
-<a name="line-26"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>username</span>
-<a name="line-27"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>Group</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
-<a name="line-28"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>group</span>
-<a name="line-29"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>gid</span>
-<a name="line-30"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>groupname</span>
-<a name="line-31"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>mode</span>
-<a name="line-32"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>anything</span>
-<a name="line-33"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>into</span>
-<a name="line-34"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>focus</span>
-<a name="line-35"></a>  <span class='hs-layout'>,</span> <span class='hs-keyword'>module</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Interpreter</span>
-<a name="line-36"></a>  <span class='hs-layout'>,</span> <span class='hs-keyword'>module</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>QQ</span>
-<a name="line-37"></a>  <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
-<a name="line-38"></a>
-<a name="line-39"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Internal</span>
-<a name="line-40"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Interpreter</span>
-<a name="line-41"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>QQ</span>
+<a name="line-10"></a>    <span class='hs-comment'>-- ** Nodes</span>
+<a name="line-11"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>file</span>
+<a name="line-12"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>symlink</span>
+<a name="line-13"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>dir</span>
+<a name="line-14"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>dirs</span>
+<a name="line-15"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>emptydir</span>
+<a name="line-16"></a>    <span class='hs-comment'>-- ** Nodes augmentation</span>
+<a name="line-17"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>contents</span>
+<a name="line-18"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>Contents</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
+<a name="line-19"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>binary</span>
+<a name="line-20"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>text</span>
+<a name="line-21"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>dedent</span>
+<a name="line-22"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>copyOf</span>
+<a name="line-23"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>source</span>
+<a name="line-24"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>exists</span>
+<a name="line-25"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>User</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
+<a name="line-26"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>user</span>
+<a name="line-27"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>uid</span>
+<a name="line-28"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>username</span>
+<a name="line-29"></a>  <span class='hs-layout'>,</span> <span class='hs-conid'>Group</span><span class='hs-layout'>(</span><span class='hs-keyglyph'>..</span><span class='hs-layout'>)</span>
+<a name="line-30"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>group</span>
+<a name="line-31"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>gid</span>
+<a name="line-32"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>groupname</span>
+<a name="line-33"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>mode</span>
+<a name="line-34"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>anything</span>
+<a name="line-35"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>into</span>
+<a name="line-36"></a>  <span class='hs-layout'>,</span> <span class='hs-varid'>focus</span>
+<a name="line-37"></a>    <span class='hs-comment'>-- * Run layouts</span>
+<a name="line-38"></a>  <span class='hs-layout'>,</span> <span class='hs-keyword'>module</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Interpreter</span>
+<a name="line-39"></a>  <span class='hs-layout'>)</span> <span class='hs-keyword'>where</span>
+<a name="line-40"></a>
+<a name="line-41"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Internal</span>
+<a name="line-42"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>Interpreter</span>
+<a name="line-43"></a><span class='hs-keyword'>import</span> <span class='hs-conid'>System</span><span class='hs-varop'>.</span><span class='hs-conid'>Directory</span><span class='hs-varop'>.</span><span class='hs-conid'>Layout</span><span class='hs-varop'>.</span><span class='hs-conid'>QQ</span>
 </pre></body>
 </html>
