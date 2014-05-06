@@ -23,28 +23,28 @@ spec :: Spec
 spec = do
   describe "Validation" $
     it "combines failures with the Semigroup instance's (<>)" $
-      traverse_ tonel ([1, 2, 3, 4] :: [Int]) `shouldBe` errors [1,2,3,4]
+      traverse_ tonel ([1, 2, 3, 4] :: [Int]) `shouldBe` fromErrors [1,2,3,4]
 
   describe "fit" $ do
     it "tests regular file existence" $ do
       temporary $ \p -> do
         r <- fit p $ do
           file "foo"
-        r `shouldBe` errors [FitIOException (p </> "foo") doesNotExistErrorType]
+        r `shouldBe` fromErrors [FitIOException (p </> "foo") doesNotExistErrorType]
 
     it "does not test regular file contents" $ do
       temporary $ \p -> do
         writeFile (p </> "foo") "foo"
         r <- fit p $ do
           file "foo"
-        r `shouldBe` errors []
+        r `shouldBe` fromErrors []
 
     it "tests text file existence" $ do
       temporary $ \p -> do
         r <- fit p $ do
           file "foo"
             & contents ?~ text "bar"
-        r `shouldBe` errors [FitIOException (p </> "foo") doesNotExistErrorType]
+        r `shouldBe` fromErrors [FitIOException (p </> "foo") doesNotExistErrorType]
 
     it "tests text file contents" $ do
       temporary $ \p -> do
@@ -52,7 +52,7 @@ spec = do
         r <- fit p $ do
           file "foo"
             & contents ?~ text "bar"
-        r `shouldBe` errors
+        r `shouldBe` fromErrors
           [ FitBadFileContents (p </> "foo") $
               FitBadText "bar" "foo"
           ]
@@ -66,7 +66,7 @@ spec = do
                 foo
                 bar
                 |]
-        r `shouldBe` errors
+        r `shouldBe` fromErrors
           [ FitBadFileContents (p </> "foo") $
               FitBadText "foo\nbar\n" "foo"
           ]
@@ -76,7 +76,7 @@ spec = do
         r <- fit p $ do
           file "foo"
             & contents ?~ binary (ByteString.pack [1, 2, 3, 4])
-        r `shouldBe` errors [FitIOException (p </> "foo") doesNotExistErrorType]
+        r `shouldBe` fromErrors [FitIOException (p </> "foo") doesNotExistErrorType]
 
     it "tests binary file contents" $ do
       temporary $ \p -> do
@@ -84,7 +84,7 @@ spec = do
         r <- fit p $ do
           file "foo"
             & contents ?~ binary (ByteString.pack [1, 2, 3, 4])
-        r `shouldBe` errors
+        r `shouldBe` fromErrors
          [ FitBadFileContents (p </> "foo") $
              FitBadBinary (ByteString.pack [1, 2, 3, 4]) (ByteString.pack [5, 6, 7, 8])
          ]
@@ -96,7 +96,7 @@ spec = do
         r <- fit p $ do
           file "foo"
             & contents ?~ copyOf (p </> "bar")
-        r `shouldBe` errors
+        r `shouldBe` fromErrors
           [ FitBadFileContents (p </> "foo") $
               FitBadCopyOf (p </> "bar")
           ]
@@ -108,20 +108,20 @@ spec = do
         r <- fit p $ do
           file "foo"
             & contents ?~ copyOf (p </> "bar")
-        r `shouldBe` errors []
+        r `shouldBe` fromErrors []
 
     it "tests symbolic link existence" $ do
       temporary $ \p -> do
         r <- fit p $ do
           symlink "foo" "bar"
-        r `shouldBe` errors [FitIOException (p </> "foo") doesNotExistErrorType]
+        r `shouldBe` fromErrors [FitIOException (p </> "foo") doesNotExistErrorType]
 
     it "tests symbolic link source" $ do
       temporary $ \p -> do
         Posix.createSymbolicLink "baz" (p </> "foo")
         r <- fit p $ do
           symlink "foo" "bar"
-        r `shouldBe` errors [FitBadLinkSource (p </> "foo") "bar" "baz"]
+        r `shouldBe` fromErrors [FitBadLinkSource (p </> "foo") "bar" "baz"]
 
     it "combines multiple errors on one layer" $ do
       temporary $ \p -> do
@@ -131,7 +131,7 @@ spec = do
           file "bar"
             & contents ?~ text "quux"
           file "baz"
-        r `shouldBe` errors
+        r `shouldBe` fromErrors
           [ FitIOException (p </> "foo") doesNotExistErrorType
           , FitBadFileContents (p </> "bar") $
               FitBadText "quux" "qux"
@@ -149,7 +149,7 @@ spec = do
               & contents ?~ text "quux"
           dir "boo" $
             file "hoo"
-        r `shouldBe` errors
+        r `shouldBe` fromErrors
           [ FitIOException (p </> "xyz" </> "xyzzy" </> "foo") doesNotExistErrorType
           , FitBadFileContents (p </> "xyz" </> "xyzzy" </> "bar") $
               FitBadText "quux" "qux"
@@ -163,7 +163,7 @@ spec = do
         r <- fit p $ do
           file "foo"
             & user ?~ uid 0
-        r `shouldBe` errors [FitBadOwnerUser (p </> "foo") (uid 0) (uid 1000)]
+        r `shouldBe` fromErrors [FitBadOwnerUser (p </> "foo") (uid 0) (uid 1000)]
 
     it "tests file owner user name" $ do
       temporary $ \p -> do
@@ -172,7 +172,7 @@ spec = do
         r <- fit p $ do
           file "foo"
             & user ?~ username "root"
-        r `shouldBe` errors [FitBadOwnerUser (p </> "foo") (username "root") (username n)]
+        r `shouldBe` fromErrors [FitBadOwnerUser (p </> "foo") (username "root") (username n)]
 
     it "tests file owner group id" $ do
       temporary $ \p -> do
@@ -180,7 +180,7 @@ spec = do
         r <- fit p $ do
           file "foo"
             & group ?~ gid 0
-        r `shouldBe` errors [FitBadOwnerGroup (p </> "foo") (gid 0) (gid 1000)]
+        r `shouldBe` fromErrors [FitBadOwnerGroup (p </> "foo") (gid 0) (gid 1000)]
 
     it "tests file owner group id" $ do
       temporary $ \p -> do
@@ -189,7 +189,7 @@ spec = do
         r <- fit p $ do
           file "foo"
             & group ?~ groupname "root"
-        r `shouldBe` errors [FitBadOwnerGroup (p </> "foo") (groupname "root") (groupname n)]
+        r `shouldBe` fromErrors [FitBadOwnerGroup (p </> "foo") (groupname "root") (groupname n)]
 
     it "tests file permissions" $ do
       temporary $ \p -> do
@@ -198,16 +198,19 @@ spec = do
         r <- fit p $ do
           file "foo"
             & mode ?~ 0o100777
-        r `shouldBe` errors [FitBadFileMode (p </> "foo") 0o100777 0o100644]
+        r `shouldBe` fromErrors [FitBadFileMode (p </> "foo") 0o100777 0o100644]
 
     it "tests symbolic link's source exists" $ do
       temporary $ \p -> do
         let l = symlink "boo" "hoo"
         Posix.createSymbolicLink "hoo" (p </> "boo")
-        fit p l `shouldReturn` errors []
-        fit p (l & exists .~ True) `shouldReturn` errors [FitIOException (p </> "boo") doesNotExistErrorType]
+        fit p l `shouldReturn`
+          fromErrors []
+        fit p (l & exists .~ True) `shouldReturn`
+          fromErrors [FitIOException (p </> "boo") doesNotExistErrorType]
         writeFile (p </> "hoo") ""
-        fit p (l & exists .~ True) `shouldReturn` errors []
+        fit p (l & exists .~ True) `shouldReturn`
+          fromErrors []
 
   describe "make" $ do
     -- examples use 'fit' because if the above spec passes then
@@ -289,14 +292,14 @@ spec = do
           file "qux"
             & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
             & user ?~ uid 0
-        r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "qux") permissionErrorType]
 
     it "changes the user id of the symbolic link owner" $ do
       temporary $ \p -> do
         r <- make p $
           symlink "foo" "bar"
             & user ?~ uid 0
-        r `shouldBe` errors [MakeIOException (p </> "foo") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "foo") permissionErrorType]
 
     it "changes the user name of the file owner" $ do
       temporary $ \p -> do
@@ -304,28 +307,28 @@ spec = do
           file "qux"
             & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
             & user ?~ username "root"
-        r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "qux") permissionErrorType]
 
     it "changes the user name of the symbolic link owner" $ do
       temporary $ \p -> do
         r <- make p $
           symlink "foo" "bar"
             & user ?~ username "root"
-        r `shouldBe` errors [MakeIOException (p </> "foo") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "foo") permissionErrorType]
 
     it "changes the user id of the directory owner" $ do
       temporary $ \p -> do
         r <- make p $
           emptydir "boo"
             & user ?~ uid 0
-        r `shouldBe` errors [MakeIOException (p </> "boo") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "boo") permissionErrorType]
 
     it "changes the user name of the directory owner" $ do
       temporary $ \p -> do
         r <- make p $
           emptydir "boo"
             & user ?~ username "root"
-        r `shouldBe` errors [MakeIOException (p </> "boo") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "boo") permissionErrorType]
 
     it "changes the group id of the file owner" $ do
       temporary $ \p -> do
@@ -333,7 +336,7 @@ spec = do
           file "qux"
             & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
             & group ?~ gid 0
-        r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "qux") permissionErrorType]
 
     it "changes the group name of the file owner" $ do
       temporary $ \p -> do
@@ -341,35 +344,35 @@ spec = do
           file "qux"
             & contents ?~ binary (ByteString.pack [104, 101, 108, 108, 111])
             & group ?~ groupname "root"
-        r `shouldBe` errors [MakeIOException (p </> "qux") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "qux") permissionErrorType]
 
     it "changes the group id of the symbolic link owner" $ do
       temporary $ \p -> do
         r <- make p $
           symlink "foo" "bar"
             & group ?~ gid 0
-        r `shouldBe` errors [MakeIOException (p </> "foo") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "foo") permissionErrorType]
 
     it "changes the group name of the symbolic link owner" $ do
       temporary $ \p -> do
         r <- make p $
           symlink "foo" "bar"
             & group ?~ groupname "root"
-        r `shouldBe` errors [MakeIOException (p </> "foo") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "foo") permissionErrorType]
 
     it "changes the group id of the directory owner" $ do
       temporary $ \p -> do
         r <- make p $
           file "boo"
             & group ?~ gid 0
-        r `shouldBe` errors [MakeIOException (p </> "boo") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "boo") permissionErrorType]
 
     it "changes the group name of the directory owner" $ do
       temporary $ \p -> do
         r <- make p $
           file "boo"
             & group ?~ groupname "root"
-        r `shouldBe` errors [MakeIOException (p </> "boo") permissionErrorType]
+        r `shouldBe` fromErrors [MakeIOException (p </> "boo") permissionErrorType]
 
     it "changes the file permissions" $ do
       makefit $
@@ -401,7 +404,7 @@ spec = do
                 file "qux"
                   & contents ?~ binary (ByteString.pack [98, 121, 101])
         _ <- make p l
-        fit p l `shouldReturn` errors
+        fit p l `shouldReturn` fromErrors
           [ FitBadFileContents (p </> "foo" </> "qux") $ FitBadBinary
               (ByteString.pack [104, 101, 108, 108, 111])
               (ByteString.pack [98, 121, 101])
@@ -412,5 +415,5 @@ tonel = Error . pure
 
 makefit :: Layout a -> IO ()
 makefit l = temporary $ \p -> do
-  make p l `shouldReturn` errors []
-  fit p l `shouldReturn` errors []
+  make p l `shouldReturn` fromErrors []
+  fit p l `shouldReturn` fromErrors []

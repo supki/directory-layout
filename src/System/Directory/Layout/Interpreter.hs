@@ -11,6 +11,7 @@ module System.Directory.Layout.Interpreter
   ( pretty
   , spec
   , Validation(..)
+  , fromErrors
   , fit
   , FitError(..)
   , FitContentsError(..)
@@ -31,7 +32,7 @@ import qualified Data.ByteString.Lazy as ByteStringLazy
 import           Data.Data (Data, Typeable)
 import           Data.Foldable (Foldable, sequenceA_, for_)
 import           Data.Functor.Compose (Compose(..))
-import           Data.List.NonEmpty (NonEmpty)
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (fromMaybe)
 import           Data.Semigroup (Semigroup(..))
 import           Data.Text (Text)
@@ -339,3 +340,14 @@ instance Semigroup e => Applicative (Validation e) where
 
 fromEither :: Either e a -> Validation e a
 fromEither = either Error Result
+
+-- | Construct 'Validation' value from the list of errors
+--
+-- >>> fromErrors []
+-- Result ()
+--
+-- >>> fromErrors "hello"
+-- Error ('h' :| "ello")
+fromErrors :: [e] -> Validation (NonEmpty e) ()
+fromErrors [] = Result ()
+fromErrors (x : xs) = Error (x :| xs)
