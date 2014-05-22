@@ -1,3 +1,8 @@
+0.6.1.1
+=======
+
+  * Missing test files in cabal tarball
+
 0.6.1.0
 =======
 
