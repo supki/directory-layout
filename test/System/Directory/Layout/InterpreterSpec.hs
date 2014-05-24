@@ -9,7 +9,7 @@ import           Control.Lens
 import qualified Data.ByteString as ByteString
 import           Data.Foldable (traverse_)
 import           Data.List.NonEmpty (NonEmpty)
-import           System.Directory (createDirectoryIfMissing)
+import           System.Directory (createDirectoryIfMissing, removeDirectoryRecursive)
 import           System.FilePath ((</>))
 import           System.IO.Error (doesNotExistErrorType, permissionErrorType)
 import qualified System.Posix as Posix
@@ -212,6 +212,16 @@ spec = do
         fit p (l & exists .~ True) `shouldReturn`
           fromErrors []
 
+    it "does not throw exceptions if root directory does not exist" $
+      temporary $ \p -> do
+        removeDirectoryRecursive p
+        r <- fit p $
+          file "foo"
+            & contents ?~ text "bar"
+        r `shouldBe` fromErrors
+          [ FitIOException (p </> "foo") doesNotExistErrorType
+          ]
+
   describe "make" $ do
     -- examples use 'fit' because if the above spec passes then
     -- we can be reasonably sure 'fit' works as expected
@@ -409,6 +419,34 @@ spec = do
               (ByteString.pack [104, 101, 108, 108, 111])
               (ByteString.pack [98, 121, 101])
           ]
+
+    it "does not throw exceptions if root directory does not exist" $
+      temporary $ \p -> do
+        removeDirectoryRecursive p
+        r <- make p $
+          file "foo"
+            & contents ?~ text "bar"
+        r `shouldBe` fromErrors [MakeIOException (p </> "foo") doesNotExistErrorType]
+
+  describe "remake" $ do
+    it "does not throw exceptions if root directory does not exist, but it checks its existence" $
+      temporary $ \p -> do
+        removeDirectoryRecursive p
+        r <- remake p $
+          file "foo"
+            & contents ?~ text "bar"
+        r `shouldBe` fromErrors
+          [ MakeIOException p doesNotExistErrorType
+          , MakeIOException (p </> "foo") doesNotExistErrorType
+          ]
+
+    it "does not remove symlink sources" $
+      temporary $ \p -> do
+        temporary $ \p' -> do
+          make p' (file "quux" & contents ?~ "symlink source") `shouldReturn` fromErrors []
+          make p (symlink "qux" (p' </> "quux")) `shouldReturn` fromErrors []
+          remake p (file "foo" & contents ?~ text "bar") `shouldReturn` fromErrors []
+          fit p' (file "quux" & contents ?~ "symlink source") `shouldReturn` fromErrors []
 
 tonel :: a -> Validation (NonEmpty a) b
 tonel = Error . pure

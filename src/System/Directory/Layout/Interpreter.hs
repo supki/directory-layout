@@ -16,6 +16,7 @@ module System.Directory.Layout.Interpreter
   , FitError(..)
   , FitContentsError(..)
   , make
+  , remake
   , MakeError(..)
   ) where
 
@@ -41,7 +42,7 @@ import           Data.Traversable (Traversable)
 import           Data.Typeable (cast)
 import           GHC.Generics (Generic)
 import           Numeric (showOct)
-import           System.Directory (createDirectoryIfMissing)
+import           System.Directory (createDirectory, createDirectoryIfMissing, removeDirectoryRecursive)
 import           System.FilePath (combine)
 import           System.IO.Error (IOErrorType, ioeGetErrorType, ioeGetFileName, ioeGetLocation)
 import qualified System.Posix as Posix
@@ -115,7 +116,10 @@ validate g p = getCompose . go p . unL where
   go _ (Free E) = pure ()
   go _ (Pure _) = pure ()
 
-  validateF root l = first pure . fromEither <$> try (g root l)
+  validateF root = validateIO . g root
+
+validateIO :: Exception e => IO a -> IO (Validation (NonEmpty e) a)
+validateIO io = first pure . fromEither <$> try io
 
 -- | Check the real directory layout fits the description
 fit :: FilePath -> Layout a -> IO (Validation (NonEmpty FitError) ())
@@ -256,6 +260,11 @@ instance Exception FitError where
 -- | Make the real directory layout from the description
 make :: FilePath -> Layout a -> IO (Validation (NonEmpty MakeError) ())
 make = validate makeIO
+
+-- | Make the real directory layout from the description removing any previous contents
+remake :: FilePath -> Layout a -> IO (Validation (NonEmpty MakeError) ())
+remake p l = getCompose $
+  Compose (validateIO (removeDirectoryRecursive p *> createDirectory p)) *> Compose (make p l)
 
 makeIO :: FilePath -> F a -> IO ()
 makeIO root = go where
