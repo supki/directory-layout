@@ -30,7 +30,7 @@ import           Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as ByteStringLazy
 import           Data.Data (Data, Typeable)
-import           Data.Foldable (Foldable, sequenceA_, for_)
+import           Data.Foldable (Foldable, sequenceA_, for_, toList)
 import           Data.Functor.Compose (Compose(..))
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Maybe (fromMaybe)
@@ -346,8 +346,16 @@ fromEither = either Error Result
 -- >>> fromErrors []
 -- Result ()
 --
+-- >>> fromErrors Nothing
+-- Result ()
+--
 -- >>> fromErrors "hello"
 -- Error ('h' :| "ello")
-fromErrors :: [e] -> Validation (NonEmpty e) ()
-fromErrors [] = Result ()
-fromErrors (x : xs) = Error (x :| xs)
+--
+-- >>> fromErrors (Just "hello")
+-- Error ("hello" :| [])
+fromErrors :: Foldable t => t e -> Validation (NonEmpty e) ()
+fromErrors = go . toList
+ where
+  go [] = Result ()
+  go (x : xs) = Error (x :| xs)
