@@ -1,3 +1,10 @@
+0.6.2.0
+=======
+
+  * Added `remake`
+
+  * Generalized `fromErrors`
+
 0.6.1.1
 =======
 
