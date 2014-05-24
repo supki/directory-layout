@@ -82,11 +82,11 @@ test-suite spec
     , lens >= 4
     , semigroups
     , template-haskell
+    , temporary >= 1.2.0.3
     , text
     , transformers
     , unix
     , unordered-containers
-    , Unixutils
   hs-source-dirs:
     src
     test

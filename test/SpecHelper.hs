@@ -1,6 +1,6 @@
 module SpecHelper where
 
-import System.Unix.Directory (withTemporaryDirectory)
+import System.IO.Temp (withSystemTempDirectory)
 
 temporary :: (FilePath -> IO a) -> IO a
-temporary = withTemporaryDirectory "directory-layout-XXXXXX"
+temporary = withSystemTempDirectory "directory-layout-XXXXXX"
