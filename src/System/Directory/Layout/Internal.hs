@@ -14,13 +14,17 @@ import           Control.Applicative
 import           Control.Lens
 import           Control.Monad.Free
 import           Data.ByteString (ByteString)
+#if __GLASGOW_HASKELL__ >= 708
 import qualified Data.ByteString as ByteString
+#endif
 import           Data.Data (Data, Typeable)
 import           Data.Foldable (Foldable)
 import qualified Data.HashMap.Strict as HashMap
 import           Data.Semigroup (Semigroup(..))
 import           Data.String (IsString(..))
+#if __GLASGOW_HASKELL__ >= 708
 import           Data.Word (Word8)
+#endif
 import           Data.Text (Text)
 #if __GLASGOW_HASKELL__ >= 708
 import           GHC.Exts (IsList(..))
@@ -28,6 +32,9 @@ import           GHC.Exts (IsList(..))
 import           GHC.Generics (Generic)
 import           System.FilePath ((</>))
 import qualified System.Posix as Posix
+
+-- $setup
+-- >>> import qualified Data.ByteString as ByteString
 
 -- | Directory layout description
 newtype Layout a = L { unL :: Free F a }
