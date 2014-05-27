@@ -1,5 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TypeOperators #-}
 module System.Directory.Layout.InterpreterSpec
   ( spec
   ) where
@@ -9,6 +10,7 @@ import           Control.Lens
 import qualified Data.ByteString as ByteString
 import           Data.Foldable (traverse_)
 import           Data.List.NonEmpty (NonEmpty)
+import qualified Data.List.NonEmpty as NonEmpty
 import           System.Directory (createDirectoryIfMissing, removeDirectoryRecursive)
 import           System.FilePath ((</>))
 import           System.IO.Error (doesNotExistErrorType, permissionErrorType)
@@ -23,7 +25,7 @@ spec :: Spec
 spec = do
   describe "Validation" $
     it "combines failures with the Semigroup instance's (<>)" $
-      traverse_ tonel ([1, 2, 3, 4] :: [Int]) `shouldBe` fromErrors [1,2,3,4]
+      traverse_ tonel ([1, 2, 3, 4] :: [Int]) `shouldBe` Error (NonEmpty.fromList [1,2,3,4])
 
   describe "fit" $ do
     it "tests regular file existence" $ do
@@ -448,7 +450,7 @@ spec = do
           remake p (file "foo" & contents ?~ text "bar") `shouldReturn` fromErrors []
           fit p' (file "quux" & contents ?~ "symlink source") `shouldReturn` fromErrors []
 
-tonel :: a -> Validation (NonEmpty a) b
+tonel :: a -> NonEmpty a \/ b
 tonel = Error . pure
 
 makefit :: Layout a -> IO ()

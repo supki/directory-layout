@@ -97,3 +97,5 @@ test-suite spec
     System.Directory.LayoutSpec
     System.Directory.Layout.InternalSpec
     System.Directory.Layout.InterpreterSpec
+  cpp-options:
+    -DTEST

@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# LANGUAGE DeriveFoldable #-}
 {-# LANGUAGE DeriveFunctor #-}
@@ -5,12 +6,12 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ViewPatterns #-}
 -- | A bunch of 'Layout' description interpreters
 module System.Directory.Layout.Interpreter
   ( pretty
   , examples
-  , Validation(..)
   , fromErrors
   , fit
   , FitError(..)
@@ -18,6 +19,9 @@ module System.Directory.Layout.Interpreter
   , make
   , remake
   , MakeError(..)
+#ifdef TEST
+  , (\/)(..)
+#endif
   ) where
 
 import           Control.Applicative
@@ -105,7 +109,7 @@ examplesC Nothing = "regular"
 
 validate
   :: Exception e
-  => (forall a. FilePath -> F a -> IO ()) -> FilePath -> Layout b -> IO (Validation (NonEmpty e) ())
+  => (forall a. FilePath -> F a -> IO ()) -> FilePath -> Layout b -> IO (NonEmpty e \/ ())
 validate g p = getCompose . go p . unL where
   go root (Free f@(F _ _ _ m)) =
     sequenceA_ [Compose (validateF root f), go root m]
@@ -118,12 +122,12 @@ validate g p = getCompose . go p . unL where
 
   validateF root = validateIO . g root
 
-validateIO :: Exception e => IO a -> IO (Validation (NonEmpty e) a)
+validateIO :: Exception e => IO a -> IO (NonEmpty e \/ a)
 validateIO io = first pure . fromEither <$> try io
 
 -- | Check the real directory layout fits the description
-fit :: FilePath -> Layout a -> IO (Validation (NonEmpty FitError) ())
-fit = validate fitIO
+fit :: FilePath -> Layout a -> IO (Either (NonEmpty FitError) ())
+fit p = fmap toEither . validate fitIO p
 
 fitIO :: FilePath -> F a -> IO ()
 fitIO root = go where
@@ -258,13 +262,14 @@ instance Exception FitError where
     | otherwise = cast e
 
 -- | Make the real directory layout from the description
-make :: FilePath -> Layout a -> IO (Validation (NonEmpty MakeError) ())
-make = validate makeIO
+make :: FilePath -> Layout a -> IO (Either (NonEmpty MakeError) ())
+make p = fmap toEither . validate makeIO p
 
 -- | Make the real directory layout from the description removing any previous contents
-remake :: FilePath -> Layout a -> IO (Validation (NonEmpty MakeError) ())
-remake p l = getCompose $
-  Compose (validateIO (removeDirectoryRecursive p *> createDirectory p)) *> Compose (make p l)
+remake :: FilePath -> Layout a -> IO (Either (NonEmpty MakeError) ())
+remake p l = fmap toEither . getCompose $
+  Compose (validateIO (removeDirectoryRecursive p *> createDirectory p)) *>
+  Compose (fmap fromEither (make p l))
 
 makeIO :: FilePath -> F a -> IO ()
 makeIO root = go where
@@ -325,46 +330,53 @@ getGroupname :: Posix.GroupID -> IO String
 getGroupname = fmap Posix.groupName . Posix.getGroupEntryForID
 
 -- | This type is isomorphic to 'Either' but its 'Applicative' instance accumulates errors
-data Validation e a = Error e | Result a
+data e \/ a = Error e | Result a
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable, Typeable, Data, Generic)
 
-instance Bifunctor Validation where
+instance Bifunctor (\/) where
   bimap f _ (Error a) = Error (f a)
   bimap _ g (Result a) = Result (g a)
 
-instance Bifoldable Validation where
+instance Bifoldable (\/) where
   bifoldMap f _ (Error a) = f a
   bifoldMap _ g (Result a) = g a
 
-instance Bitraversable Validation where
+instance Bitraversable (\/) where
   bitraverse f _ (Error a) = Error <$> f a
   bitraverse _ g (Result a) = Result <$> g a
 
-instance Semigroup e => Applicative (Validation e) where
+instance Semigroup e => Applicative ((\/) e) where
   pure = Result
   Error f  <*> Error x  = Error (f <> x)
   Error f  <*> _        = Error f
   _        <*> Error x  = Error x
   Result f <*> Result x = Result (f x)
 
-fromEither :: Either e a -> Validation e a
+fromEither :: Either e a -> e \/ a
 fromEither = either Error Result
+
+toEither :: e \/ a -> Either e a
+toEither = validation Left Right
+
+validation :: (e -> t) -> (a -> t) -> e \/ a -> t
+validation f _ (Error e)  = f e
+validation _ g (Result a) = g a
 
 -- | Construct 'Validation' value from the list of errors
 --
 -- >>> fromErrors []
--- Result ()
+-- Right ()
 --
 -- >>> fromErrors Nothing
--- Result ()
+-- Right ()
 --
 -- >>> fromErrors "hello"
--- Error ('h' :| "ello")
+-- Left ('h' :| "ello")
 --
 -- >>> fromErrors (Just "hello")
--- Error ("hello" :| [])
-fromErrors :: Foldable t => t e -> Validation (NonEmpty e) ()
+-- Left ("hello" :| [])
+fromErrors :: Foldable t => t e -> Either (NonEmpty e) ()
 fromErrors = go . toList
  where
-  go [] = Result ()
-  go (x : xs) = Error (x :| xs)
+  go [] = Right ()
+  go (x : xs) = Left (x :| xs)
