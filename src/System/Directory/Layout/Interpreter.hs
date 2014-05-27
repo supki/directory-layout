@@ -28,9 +28,6 @@ import           Control.Applicative
 import           Control.Exception (Exception(..), SomeException(..), throwIO, try)
 import           Control.Monad
 import           Control.Monad.Free
-import           Data.Bifoldable (Bifoldable(..))
-import           Data.Bifunctor (Bifunctor(..))
-import           Data.Bitraversable (Bitraversable(..))
 import           Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Lazy as ByteStringLazy
@@ -123,7 +120,7 @@ validate g p = getCompose . go p . unL where
   validateF root = validateIO . g root
 
 validateIO :: Exception e => IO a -> IO (NonEmpty e \/ a)
-validateIO io = first pure . fromEither <$> try io
+validateIO io = either (Error . pure) Result <$> try io
 
 -- | Check the real directory layout fits the description
 fit :: FilePath -> Layout a -> IO (Either (NonEmpty FitError) ())
@@ -332,18 +329,6 @@ getGroupname = fmap Posix.groupName . Posix.getGroupEntryForID
 -- | This type is isomorphic to 'Either' but its 'Applicative' instance accumulates errors
 data e \/ a = Error e | Result a
   deriving (Show, Eq, Ord, Functor, Foldable, Traversable, Typeable, Data, Generic)
-
-instance Bifunctor (\/) where
-  bimap f _ (Error a) = Error (f a)
-  bimap _ g (Result a) = Result (g a)
-
-instance Bifoldable (\/) where
-  bifoldMap f _ (Error a) = f a
-  bifoldMap _ g (Result a) = g a
-
-instance Bitraversable (\/) where
-  bitraverse f _ (Error a) = Error <$> f a
-  bitraverse _ g (Result a) = Result <$> g a
 
 instance Semigroup e => Applicative ((\/) e) where
   pure = Result

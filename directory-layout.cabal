@@ -28,7 +28,6 @@ library
     Haskell2010
   build-depends:
       base                 >= 4.6   && < 5
-    , bifunctors           >= 4
     , bytestring
     , directory
     , filepath
@@ -73,7 +72,6 @@ test-suite spec
     exitcode-stdio-1.0
   build-depends:
       base >= 4.6
-    , bifunctors
     , bytestring
     , directory
     , filepath
