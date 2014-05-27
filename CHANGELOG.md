@@ -3,6 +3,8 @@
 
   * Renamed `spec` interpreter to `examples` to make it `hspec-discover`-compatible
 
+  * Switch API to `Either` from a `Validation`-like thingie
+
 0.6.2.0
 =======
 
