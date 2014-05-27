@@ -16,7 +16,7 @@ import qualified System.Posix as Posix
 import           Test.Hspec
 
 import           SpecHelper
-import           System.Directory.Layout hiding (spec)
+import           System.Directory.Layout
 
 
 spec :: Spec

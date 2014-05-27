@@ -4,17 +4,16 @@ module System.Directory.LayoutSpec
   ( spec
   ) where
 
-import           Control.Lens
-import           Test.Hspec
+import Control.Lens
+import Test.Hspec
 
-import           System.Directory.Layout hiding (spec)
-import qualified System.Directory.Layout.Interpreter as L
+import System.Directory.Layout
 
 
 spec :: Spec
 spec = do
   describe "directory-layout project structure" $ do
-    rel L.spec project
+    rel examples project
 
 project :: Layout ()
 project = do

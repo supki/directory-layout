@@ -1,3 +1,8 @@
+0.7.0.0
+=======
+
+  * Renamed `spec` interpreter to `examples` to make it `hspec-discover`-compatible
+
 0.6.2.0
 =======
 

@@ -9,7 +9,7 @@
 -- | A bunch of 'Layout' description interpreters
 module System.Directory.Layout.Interpreter
   ( pretty
-  , spec
+  , examples
   , Validation(..)
   , fromErrors
   , fit
@@ -75,23 +75,23 @@ prettyC (Just (CopyOf p)) = printf "(copy of ‘%s’)" p
 prettyC Nothing = "anything"
 
 -- | Interpret the directory layout as a 'Spec'
-spec :: FilePath -> Layout a -> Spec
-spec p = go p . unL where
+examples :: FilePath -> Layout a -> Spec
+examples p = go p . unL where
   go root (Free f@(F _ _ _ m)) = do
-    specF root f
+    examplesF root f
     go root m
   go root (Free f@(SL _ _ _ _ m)) = do
-    specF root f
+    examplesF root f
     go root m
   go root (Free f@(D (combine root -> fullpath) is _ m)) = do
-    specF root f
+    examplesF root f
     context (printf "directory ‘%s’" fullpath) (go fullpath is)
     go root m
   go _ (Free E) = return ()
   go _ (Pure _) = return ()
 
-specF :: FilePath -> F a -> Spec
-specF root = go where
+examplesF :: FilePath -> F a -> Spec
+examplesF root = go where
   go f@(F name cs _ _) = it (printf "has a %s file ‘%s’" (examplesC cs) name) (fitIO root f)
   go f@(SL name s _ _ _) = it (printf "has a symlink ‘%s’ pointing to ‘%s’" name s) (fitIO root f)
   go f@(D (combine root -> fullpath) _ _ _) = it (printf "has a subdirectory ‘%s’" fullpath) (fitIO root f)
