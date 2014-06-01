@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
-{-# OPTIONS_GHC -fno-warn-type-defaults #-}
 module System.Directory.Layout.QQSpec
   ( spec
   ) where
@@ -14,17 +13,17 @@ import System.Directory.Layout.QQ
 spec :: Spec
 spec =
   describe "dedent" $ do
-    it "handles the empty input" $
+    it "gives reasonable result for the empty input" $
       [dedent||] `shouldBe` ""
 
-    it "handles a simple input" $
+    it "handles a single line input" $
       [dedent|hello|] `shouldBe` "hello"
 
     it "ignores the first line when it consists solely of spaces" $
       [dedent|
       hello|] `shouldBe` "hello"
 
-    it "does not ignore the first line when it has any non-space characters" $
+    it "considers the first line when it has non-space characters" $
       [dedent|hello
       world|] `shouldBe` "hello\n      world"
 
@@ -41,3 +40,29 @@ spec =
         world
       !
       |] `shouldBe` ("hello\n  world\n!\n" :: Text)
+
+    it "ignores indentation in the last line if it's all spaces" $
+      [dedent|
+        hello
+          world
+        !
+      |] `shouldBe` "hello\n  world\n!\n"
+
+    it "saves empty lines at the beginning of the string" $
+      [dedent|
+        
+        
+        hello
+          world
+        !
+      |] `shouldBe` "\n\nhello\n  world\n!\n"
+
+
+    it "saves empty lines at the end of the string" $
+      [dedent|
+        hello
+          world
+        !
+        
+        
+      |] `shouldBe` "hello\n  world\n!\n\n\n"

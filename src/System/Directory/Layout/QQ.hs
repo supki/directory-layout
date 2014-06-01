@@ -2,11 +2,16 @@
 -- | Convenience quasiquoter to ease the pain working with multiline strings
 module System.Directory.Layout.QQ (dedent) where
 
-import Data.Char (isSpace)
-import Data.List (intercalate)
-import Language.Haskell.TH.Quote (QuasiQuoter(..))
-import Language.Haskell.TH.Syntax (liftString)
-import Language.Haskell.TH (Q, Exp)
+import           Control.Applicative
+import           Data.Char (isSpace)
+import           Data.Foldable (Foldable(..), toList)
+import           Data.List (intercalate)
+import           Data.Sequence (Seq, ViewL(..), ViewR(..), (|>))
+import qualified Data.Sequence as Seq
+import           Language.Haskell.TH.Quote (QuasiQuoter(..))
+import           Language.Haskell.TH.Syntax (liftString)
+import           Language.Haskell.TH (Q, Exp)
+import           Prelude hiding (foldr)
 
 
 -- | A handy quasiquoter to work with the multiline file contents
@@ -27,23 +32,51 @@ import Language.Haskell.TH (Q, Exp)
 --   !
 dedent :: QuasiQuoter
 dedent = quoter $
-  liftString . intercalate "\n" . stripCommonLeadingWhitespace . dropFirst (all isSpace) . lines
+  liftString . withLines (strip . trim (all isSpace))
 
-dropFirst :: (a -> Bool) -> [a] -> [a]
-dropFirst _ [] = []
-dropFirst p (x : xs)
-  | p x = xs
-  | otherwise = x : xs
+withLines :: (Seq String -> Seq String) -> String -> String
+withLines f = unsplit '\n' . toList . f . Seq.fromList . split '\n'
 
-stripCommonLeadingWhitespace :: [String] -> [String]
-stripCommonLeadingWhitespace xs = map (drop (commonLeadingWhitespace xs)) xs
+split :: Eq a => a -> [a] -> [[a]]
+split sep xs = case break (== sep) xs of
+  (ys, [])     -> ys : []
+  (ys, _ : zs) -> ys : split sep zs
 
-commonLeadingWhitespace :: [String] -> Int
-commonLeadingWhitespace = minimumOr 0 . map (length . takeWhile isSpace)
+unsplit :: a -> [[a]] -> [a]
+unsplit = intercalate . pure
 
-minimumOr :: Ord a => a -> [a] -> a
-minimumOr n [] = n
-minimumOr _ xs = minimum xs
+-- | The first line can be safely dropped if it consists only of spaces,
+-- but we want to preserve the last newline, thus last line can only be trimmed
+trim :: (String -> Bool) -> Seq String -> Seq String
+trim f = trimLast f . dropFirst f
+
+dropFirst :: (String -> Bool) -> Seq String -> Seq String
+dropFirst p xs = case Seq.viewl xs of
+  y :< ys | p y -> ys
+  _ -> xs
+
+trimLast :: (String -> Bool) -> Seq String -> Seq String
+trimLast p xs = case Seq.viewr xs of
+  ys :> y | p y -> ys |> ""
+  _ -> xs
+
+strip :: Seq String -> Seq String
+strip xs = case Seq.viewr xs of
+  vs :> "" -> stripCommonLeadingWhitespace vs |> ""
+  _        -> stripCommonLeadingWhitespace xs
+
+stripCommonLeadingWhitespace :: (Functor f, Foldable f) => f String -> f String
+stripCommonLeadingWhitespace xs = drop (commonLeadingWhitespace xs) <$> xs
+
+commonLeadingWhitespace :: (Functor f, Foldable f) => f String -> Int
+commonLeadingWhitespace = minimumOr 0 . fmap (length . takeWhile isSpace)
+
+minimumOr :: (Foldable f, Ord a) => a -> f a -> a
+minimumOr n = maybe n id . foldr (lmin . Just) Nothing
+ where
+  lmin (Just x) (Just y) = Just (min x y)
+  lmin Nothing x = x
+  lmin x Nothing = x
 
 quoter :: (String -> Q Exp) -> QuasiQuoter
 quoter quote = QuasiQuoter

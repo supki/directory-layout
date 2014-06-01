@@ -1,3 +1,8 @@
+0.7.1.0
+=======
+
+  * Made `dedent` more flexible
+
 0.7.0.0
 =======
 
