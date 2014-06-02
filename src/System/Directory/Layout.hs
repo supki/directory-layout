@@ -19,6 +19,7 @@ module System.Directory.Layout
   , binary
   , text
   , dedent
+  , dedentSubst
   , copyOf
   , source
   , exists
