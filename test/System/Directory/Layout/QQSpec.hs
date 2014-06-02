@@ -11,7 +11,7 @@ import System.Directory.Layout.QQ
 
 
 spec :: Spec
-spec =
+spec = do
   describe "dedent" $ do
     it "gives reasonable result for the empty input" $
       [dedent||] `shouldBe` ""
@@ -66,3 +66,14 @@ spec =
         
         
       |] `shouldBe` "hello\n  world\n!\n\n\n"
+
+  describe "dedentSubst" $ do
+    it "is like dedent but also supports variable substitution" $ do
+      let hello = ("bye" :: String)
+      [dedentSubst|
+        #{hello}
+          world
+        !
+        
+        
+      |] `shouldBe` "bye\n  world\n!\n\n\n"

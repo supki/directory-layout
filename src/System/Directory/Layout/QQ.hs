@@ -1,6 +1,9 @@
 {-# LANGUAGE TemplateHaskell #-}
 -- | Convenience quasiquoter to ease the pain working with multiline strings
-module System.Directory.Layout.QQ (dedent) where
+module System.Directory.Layout.QQ
+  ( dedent
+  , dedentSubst
+  ) where
 
 import           Control.Applicative
 import           Data.Char (isSpace)
@@ -12,27 +15,48 @@ import           Language.Haskell.TH.Quote (QuasiQuoter(..))
 import           Language.Haskell.TH.Syntax (liftString)
 import           Language.Haskell.TH (Q, Exp)
 import           Prelude hiding (foldr)
+import           System.Command.QQ (substituteVars, quoter)
 
+
+-- $setup
+-- >>> :set -XQuasiQuotes
 
 -- | A handy quasiquoter to work with the multiline file contents
 --
 -- Strips the longest common leading spaces segment. All spacey characters are treated
 -- equally. The first line is ignored if it's spaces only.
 --
--- >>> :set -XQuasiQuotes
 -- >>> :{
 -- putStr [dedent|
 --   hello
 --     world
 --     !
---   |]
+-- |]
 -- :}
 -- hello
 --   world
 --   !
 dedent :: QuasiQuoter
-dedent = quoter $
-  liftString . withLines (strip . trim (all isSpace))
+dedent = dedentWith liftString
+
+-- | 'dedent' with variable substitution
+--
+-- >>> let hello = "bye" :: String
+-- >>> :{
+-- putStr [dedentSubst|
+--   #{hello}
+--     world
+--     !
+-- |]
+-- :}
+-- bye
+--   world
+--   !
+dedentSubst :: QuasiQuoter
+dedentSubst = dedentWith substituteVars
+
+dedentWith :: (String -> Q Exp) -> QuasiQuoter
+dedentWith f = quoter $ f . withLines (strip . trim (all isSpace))
 
 withLines :: (Seq String -> Seq String) -> String -> String
 withLines f = unsplit '\n' . toList . f . Seq.fromList . split '\n'
@@ -77,14 +101,3 @@ minimumOr n = maybe n id . foldr (lmin . Just) Nothing
   lmin (Just x) (Just y) = Just (min x y)
   lmin Nothing x = x
   lmin x Nothing = x
-
-quoter :: (String -> Q Exp) -> QuasiQuoter
-quoter quote = QuasiQuoter
-  { quoteExp  = quote
-  , quotePat  = failure "patterns"
-  , quoteType = failure "types"
-  , quoteDec  = failure "declarations"
-  }
- where
-  failure kind =
-    fail $ "this quasiquoter does not support splicing " ++ kind

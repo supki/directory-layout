@@ -1,3 +1,8 @@
+0.7.2.0
+=======
+
+  * Added `dedentSubst`, `dedent` with variable substitution
+
 0.7.1.0
 =======
 
