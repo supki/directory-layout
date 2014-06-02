@@ -11,6 +11,7 @@ import           Data.Foldable (Foldable(..), toList)
 import           Data.List (intercalate)
 import           Data.Sequence (Seq, ViewL(..), ViewR(..), (|>))
 import qualified Data.Sequence as Seq
+import           Data.String (fromString)
 import           Language.Haskell.TH.Quote (QuasiQuoter(..))
 import           Language.Haskell.TH.Syntax (liftString)
 import           Language.Haskell.TH (Q, Exp)
@@ -53,7 +54,7 @@ dedent = dedentWith liftString
 --   world
 --   !
 dedentSubst :: QuasiQuoter
-dedentSubst = dedentWith substituteVars
+dedentSubst = dedentWith $ \x -> [e| fromString $(substituteVars x) |]
 
 dedentWith :: (String -> Q Exp) -> QuasiQuoter
 dedentWith f = quoter $ f . withLines (strip . trim (all isSpace))

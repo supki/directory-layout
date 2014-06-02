@@ -1,3 +1,8 @@
+0.7.3.0
+=======
+
+  * Made `dedentSubst` more polymorphic
+
 0.7.2.0
 =======
 

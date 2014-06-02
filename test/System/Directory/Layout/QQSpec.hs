@@ -69,7 +69,7 @@ spec = do
 
   describe "dedentSubst" $ do
     it "is like dedent but also supports variable substitution" $ do
-      let hello = ("bye" :: String)
+      let hello = "bye" :: String
       [dedentSubst|
         #{hello}
           world
@@ -77,3 +77,11 @@ spec = do
         
         
       |] `shouldBe` "bye\n  world\n!\n\n\n"
+
+    it "can be parsed into any IsString instance" $ do
+      let hello = "bye" :: String
+      [dedentSubst|
+        #{hello}
+          world
+        !
+      |] `shouldBe` ("bye\n  world\n!\n" :: Text)
