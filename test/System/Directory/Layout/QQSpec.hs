@@ -78,6 +78,15 @@ spec = do
         
       |] `shouldBe` "bye\n  world\n!\n\n\n"
 
+    it "is supports escaping" $ do
+      [dedentSubst|
+        \#{hello}
+          world
+        !
+        
+        
+      |] `shouldBe` "#{hello}\n  world\n!\n\n\n"
+
     it "can be parsed into any IsString instance" $ do
       let hello = "bye" :: String
       [dedentSubst|
