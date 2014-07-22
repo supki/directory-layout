@@ -1,7 +1,8 @@
-# A sample Guardfile
-# More info at https://github.com/guard/guard#readme
+repl_options = \
+  [ "--ghc-options=-ignore-dot-ghci -DTEST"
+  ]
 
-guard :haskell, ghci_options: ["-ignore-dot-ghci", "-DTEST"], all_on_start: true do
+guard :haskell, all_on_start: true, repl_options: repl_options do
   watch(%r{test/.+Spec\.l?hs$})
   watch(%r{src/.+\.l?hs$})
 end

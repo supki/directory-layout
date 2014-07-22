@@ -66,6 +66,7 @@ split :: Eq a => a -> [a] -> [[a]]
 split sep xs = case break (== sep) xs of
   (ys, [])     -> ys : []
   (ys, _ : zs) -> ys : split sep zs
+{-# ANN split "HLint: ignore Use list literal" #-}
 
 unsplit :: a -> [[a]] -> [a]
 unsplit = intercalate . pure
@@ -90,15 +91,17 @@ strip xs = case Seq.viewr xs of
   vs :> "" -> stripCommonLeadingWhitespace vs |> ""
   _        -> stripCommonLeadingWhitespace xs
 
-stripCommonLeadingWhitespace :: (Functor f, Foldable f) => f String -> f String
+stripCommonLeadingWhitespace :: Seq String -> Seq String
 stripCommonLeadingWhitespace xs = drop (commonLeadingWhitespace xs) <$> xs
 
-commonLeadingWhitespace :: (Functor f, Foldable f) => f String -> Int
-commonLeadingWhitespace = minimumOr 0 . fmap (length . takeWhile isSpace)
+commonLeadingWhitespace :: Seq String -> Int
+commonLeadingWhitespace =
+  minimumOr 0 . fmap (length . takeWhile isSpace) . Seq.filter (not . null)
 
 minimumOr :: (Foldable f, Ord a) => a -> f a -> a
 minimumOr n = maybe n id . foldr (lmin . Just) Nothing
  where
   lmin (Just x) (Just y) = Just (min x y)
-  lmin Nothing x = x
-  lmin x Nothing = x
+  lmin Nothing  x        = x
+  lmin x        Nothing  = x
+{-# ANN minimumOr "HLint: ignore Use fromMaybe" #-}

@@ -1,3 +1,9 @@
+0.7.4
+=====
+
+  * Adjusted dedentation algorithm to ignore empty lines when calculating an amount
+  of spaces to drop
+
 0.7.3.0
 =======
 

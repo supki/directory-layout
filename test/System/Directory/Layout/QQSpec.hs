@@ -50,8 +50,8 @@ spec = do
 
     it "saves empty lines at the beginning of the string" $
       [dedent|
-        
-        
+
+
         hello
           world
         !
@@ -63,8 +63,8 @@ spec = do
         hello
           world
         !
-        
-        
+
+
       |] `shouldBe` "hello\n  world\n!\n\n\n"
 
   describe "dedentSubst" $ do
@@ -74,17 +74,17 @@ spec = do
         #{hello}
           world
         !
-        
-        
+
+
       |] `shouldBe` "bye\n  world\n!\n\n\n"
 
-    it "is supports escaping" $ do
+    it "is supports escaping" $
       [dedentSubst|
         \#{hello}
           world
         !
-        
-        
+
+
       |] `shouldBe` "#{hello}\n  world\n!\n\n\n"
 
     it "can be parsed into any IsString instance" $ do

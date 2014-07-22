@@ -1,5 +1,5 @@
 name:                directory-layout
-version:             0.7.3.1
+version:             0.7.4
 synopsis:            Directory layout DSL
 description:
   Making, fitting, printing directory layouts
@@ -21,7 +21,7 @@ source-repository head
 source-repository this
   type:     git
   location: https://github.com/supki/directory-layout
-  tag:      0.7.3.1
+  tag:      0.7.4
 
 library
   default-language:
@@ -58,7 +58,7 @@ test-suite doctest
   type:
     exitcode-stdio-1.0
   build-depends:
-      base          == 4.*
+      base      == 4.*
     , directory
     , doctest
     , filepath
@@ -81,10 +81,10 @@ test-suite spec
     , filepath
     , free
     , hspec
-    , lens >= 4
+    , lens                 >= 4
     , semigroups
     , template-haskell
-    , temporary >= 1.2.0.3
+    , temporary            >= 1.2.0.3
     , text
     , transformers
     , unix
