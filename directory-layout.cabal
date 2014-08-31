@@ -1,5 +1,5 @@
 name:                directory-layout
-version:             0.7.4
+version:             0.7.4.1
 synopsis:            Directory layout DSL
 description:
   Making, fitting, printing directory layouts
@@ -9,7 +9,7 @@ author:              Matvey Aksenov
 maintainer:          matvey.aksenov@gmail.com
 category:            System, Testing
 build-type:          Simple
-cabal-version:       >=1.10
+cabal-version:       >= 1.10
 extra-source-files:
   README.md
   CHANGELOG.md
@@ -23,7 +23,7 @@ source-repository head
 source-repository this
   type:     git
   location: https://github.com/supki/directory-layout
-  tag:      0.7.4
+  tag:      0.7.4.1
 
 library
   default-language:
