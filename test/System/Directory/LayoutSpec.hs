@@ -22,20 +22,24 @@ project = do
       dir "Layout" $ do
         file "Internal.hs"
         file "Interpreter.hs"
+        file "QQ.hs"
       file "Layout.hs"
   dir "test" $ do
     dirs ["System", "Directory"] $ do
       dir "Layout" $ do
         file "InternalSpec.hs"
         file "InterpreterSpec.hs"
+        file "QQSpec.hs"
       file "LayoutSpec.hs"
     file "Spec.hs"
       & contents ?~ [dedent|
         {-# OPTIONS_GHC -F -pgmF hspec-discover #-}
         |]
     file "SpecHelper.hs"
+    file "Doctest.hs"
   file "LICENSE"
   file "Guardfile"
+  file "Gemfile"
   file "Setup.hs"
   file "directory-layout.cabal"
 

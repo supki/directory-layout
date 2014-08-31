@@ -7,6 +7,7 @@ module System.Directory.Layout.InterpreterSpec
 
 import           Control.Applicative
 import           Control.Lens
+import           Control.Monad
 import qualified Data.ByteString as ByteString
 import           Data.Foldable (traverse_)
 import           Data.List.NonEmpty (NonEmpty)
@@ -161,37 +162,43 @@ spec = do
 
     it "tests file owner user id" $ do
       temporary $ \p -> do
-        writeFile (p </> "foo") ""
+        let u = p </> "foo"
+        writeFile u ""
+        n <- fileOwnerUID u
         r <- fit p $ do
           file "foo"
             & user ?~ uid 0
-        r `shouldBe` fromErrors [FitBadOwnerUser (p </> "foo") (uid 0) (uid 1000)]
+        r `shouldBe` fromErrors [FitBadOwnerUser u (uid 0) (uid n)]
 
     it "tests file owner user name" $ do
       temporary $ \p -> do
-        writeFile (p </> "foo") ""
-        n <- Posix.getEffectiveUserName
+        let u = p </> "foo"
+        writeFile u ""
+        n <- fileOwnerUserName u
         r <- fit p $ do
           file "foo"
             & user ?~ username "root"
-        r `shouldBe` fromErrors [FitBadOwnerUser (p </> "foo") (username "root") (username n)]
+        r `shouldBe` fromErrors [FitBadOwnerUser u (username "root") (username n)]
 
     it "tests file owner group id" $ do
       temporary $ \p -> do
-        writeFile (p </> "foo") ""
+        let u = p </> "foo"
+        writeFile u ""
+        n <- fileOwnerGID u
         r <- fit p $ do
           file "foo"
             & group ?~ gid 0
-        r `shouldBe` fromErrors [FitBadOwnerGroup (p </> "foo") (gid 0) (gid 1000)]
+        r `shouldBe` fromErrors [FitBadOwnerGroup u (gid 0) (gid n)]
 
     it "tests file owner group id" $ do
       temporary $ \p -> do
-        writeFile (p </> "foo") ""
-        n <- Posix.getEffectiveUserName
+        let u = p </> "foo"
+        writeFile u ""
+        n <- fileOwnerGroupName u
         r <- fit p $ do
           file "foo"
             & group ?~ groupname "root"
-        r `shouldBe` fromErrors [FitBadOwnerGroup (p </> "foo") (groupname "root") (groupname n)]
+        r `shouldBe` fromErrors [FitBadOwnerGroup u (groupname "root") (groupname n)]
 
     it "tests file permissions" $ do
       temporary $ \p -> do
@@ -457,3 +464,15 @@ makefit :: Layout a -> IO ()
 makefit l = temporary $ \p -> do
   make p l `shouldReturn` fromErrors []
   fit p l `shouldReturn` fromErrors []
+
+fileOwnerUID :: FilePath -> IO Posix.UserID
+fileOwnerUID = fmap Posix.fileOwner . Posix.getSymbolicLinkStatus
+
+fileOwnerUserName :: FilePath -> IO String
+fileOwnerUserName = fmap Posix.userName . Posix.getUserEntryForID <=< fileOwnerUID
+
+fileOwnerGID :: FilePath -> IO Posix.GroupID
+fileOwnerGID = fmap Posix.fileGroup . Posix.getSymbolicLinkStatus
+
+fileOwnerGroupName :: FilePath -> IO String
+fileOwnerGroupName = fmap Posix.groupName . Posix.getGroupEntryForID <=< fileOwnerGID

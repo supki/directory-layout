@@ -13,6 +13,8 @@ cabal-version:       >=1.10
 extra-source-files:
   README.md
   CHANGELOG.md
+  Gemfile
+  Guardfile
 
 source-repository head
   type:     git
@@ -99,5 +101,6 @@ test-suite spec
     System.Directory.LayoutSpec
     System.Directory.Layout.InternalSpec
     System.Directory.Layout.InterpreterSpec
+    System.Directory.Layout.QQSpec
   cpp-options:
     -DTEST
